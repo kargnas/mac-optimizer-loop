@@ -1,0 +1,193 @@
+# Release pipeline (pure SwiftPM): build -> Developer ID sign -> notarize ->
+# DMG -> notarize DMG -> GitHub Release -> bump Homebrew cask.
+#
+# Inert until these repo secrets exist (see docs/release-setup.md):
+#   BUILD_CERTIFICATE_BASE64, P12_PASSWORD, KEYCHAIN_PASSWORD,
+#   APPLE_ID, APPLE_APP_PASSWORD, APPLE_TEAM_ID, TAP_SSH_KEY
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v0.1.0).'
+        required: true
+
+permissions:
+  contents: write
+
+# Serialize release builds so two dispatches cannot interleave.
+concurrency:
+  group: build-release
+
+jobs:
+  release:
+    runs-on: macos-14
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: resolve
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.version }}"
+            # Refuse to clobber an already-released tag's assets.
+            if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+              echo "Tag $VERSION already exists; refusing to overwrite. Re-run with a new version." >&2
+              exit 1
+            fi
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "APP_VERSION=${VERSION#v}" >> "$GITHUB_ENV"
+          echo "DMG_NAME=MacLoadAdvisor-${VERSION}.dmg" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Import Developer ID certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+      - name: Build, bundle and sign app
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+          HARDENED_RUNTIME: '1'
+          CODE_SIGN_IDENTITY: 'Developer ID Application'
+        run: ./script/build-app.zsh
+
+      - name: Notarize app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ditto -c -k --keepParent dist/MacLoadAdvisor.app "$RUNNER_TEMP/app-notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/app-notarize.zip" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait --timeout 30m
+          xcrun stapler staple dist/MacLoadAdvisor.app
+
+      - name: Create DMG
+        run: |
+          # Stage only the .app so build artifacts never leak into the DMG.
+          DMG_STAGING="$RUNNER_TEMP/dmg_staging"
+          mkdir -p "$DMG_STAGING"
+          cp -R dist/MacLoadAdvisor.app "$DMG_STAGING/"
+          ln -s /Applications "$DMG_STAGING/Applications"
+          hdiutil create -volname "MacLoadAdvisor" \
+            -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_NAME"
+          codesign --force --sign "Developer ID Application" "$DMG_NAME"
+          rm -rf "$DMG_STAGING"
+
+      - name: Notarize DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun notarytool submit "$DMG_NAME" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait --timeout 30m
+          xcrun stapler staple "$DMG_NAME"
+
+      - name: Cleanup keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          files: MacLoadAdvisor-*.dmg
+          generate_release_notes: true
+
+  # Create or bump the Homebrew cask in kargnas/homebrew-tap so
+  # `brew install --cask kargnas/tap/mac-optimizer-loop` resolves to this DMG.
+  # Needs a write deploy key (TAP_SSH_KEY); GITHUB_TOKEN cannot push cross-repo.
+  update-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create/update Homebrew cask
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+          TAP_SSH_KEY: ${{ secrets.TAP_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          APP_VERSION="${VERSION#v}"
+
+          curl -fsSL -o app.dmg \
+            "https://github.com/kargnas/mac-optimizer-loop/releases/download/${VERSION}/MacLoadAdvisor-${VERSION}.dmg"
+          SHA256=$(sha256sum app.dmg | cut -d' ' -f1)
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$TAP_SSH_KEY" > ~/.ssh/tap_key
+          chmod 600 ~/.ssh/tap_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/tap_key -o IdentitiesOnly=yes"
+
+          git clone --depth 1 git@github.com:kargnas/homebrew-tap.git tap
+
+          # Generate the whole cask each release (create-or-replace) so the first
+          # release bootstraps it and later releases keep version+sha in sync.
+          mkdir -p tap/Casks
+          cat > tap/Casks/mac-optimizer-loop.rb <<CASK
+          cask "mac-optimizer-loop" do
+            version "${APP_VERSION}"
+            sha256 "${SHA256}"
+
+            url "https://github.com/kargnas/mac-optimizer-loop/releases/download/v#{version}/MacLoadAdvisor-v#{version}.dmg"
+            name "Mac Optimizer Loop"
+            desc "Menu-bar agent loop that asks Claude what's overloading your Mac"
+            homepage "https://github.com/kargnas/mac-optimizer-loop"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            depends_on macos: ">= :ventura"
+
+            app "MacLoadAdvisor.app"
+
+            zap trash: [
+              "~/.config/mac-load-advisor",
+              "~/Library/Caches/as.kargn.MacLoadAdvisor",
+              "~/Library/HTTPStorages/as.kargn.MacLoadAdvisor",
+              "~/Library/Preferences/as.kargn.MacLoadAdvisor.plist",
+            ]
+          end
+          CASK
+
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/mac-optimizer-loop.rb
+          # A re-run of an already-published version yields no diff; skip rather than fail.
+          git diff --cached --quiet || {
+            git commit -m "mac-optimizer-loop ${APP_VERSION}"
+            git push origin HEAD:main
+          }

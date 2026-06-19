@@ -26,6 +26,18 @@ periodically analyzes system load with Claude and surfaces prioritized advice.
   runs the one-shot snapshot AND, when `monitorSeconds > 0`, a second `--monitor N`
   pass (separate script mode) appended to the report. `0` disables the monitor pass.
 
+## Release pipeline
+
+`script/build-app.zsh` packages a distributable `dist/MacLoadAdvisor.app` (release
+build + version-stamped `Info.plist`). Local default is ad-hoc sign; CI sets
+`CODE_SIGN_IDENTITY="Developer ID Application"` + `HARDENED_RUNTIME=1` for a
+notarizable bundle. Keep it separate from `build_and_run.sh` (that is the fast
+debug dev loop). `.github/workflows/auto-release.yml` bumps the patch version on
+pushes to `main` and dispatches `build-release.yml` (build → sign → notarize → DMG
+→ GitHub Release → `update-tap` writes the `kargnas/homebrew-tap` cask). The
+pipeline is **inert until signing secrets exist** — see `docs/release-setup.md`.
+Sparkle in-app auto-update is intentionally not wired yet (needs app-target changes).
+
 ## Terminal Launching — single entry point
 
 All terminal-opening features (Show Command in Terminal, Claude review) go through

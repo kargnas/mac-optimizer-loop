@@ -68,9 +68,17 @@ timer → collect → claude analyze → rank suggestions
                                                    └─ else → confirm (default Cancel)
 ```
 
-## Quick start
+## Install
 
-Requires macOS 13+, a Swift toolchain, and the `claude` CLI on your PATH.
+Needs the `claude` CLI on your PATH. macOS 13+.
+
+```bash
+brew install --cask kargnas/tap/mac-optimizer-loop
+```
+
+> _The cask + DMG go live after the first signed release. The release pipeline is wired but waits on signing secrets — see [docs/release-setup.md](docs/release-setup.md). Until then, build from source below._
+
+### Build from source
 
 ```bash
 git clone https://github.com/kargnas/mac-optimizer-loop

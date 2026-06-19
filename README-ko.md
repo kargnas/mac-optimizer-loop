@@ -68,9 +68,17 @@ MUST NOT: claim anything was executed — the app never auto-runs.
                                                └─ 그외 → 확인 (기본 취소)
 ```
 
-## 빠른 시작
+## 설치
 
-macOS 13+, Swift 툴체인, PATH 위의 `claude` CLI 필요.
+PATH 위의 `claude` CLI 필요. macOS 13+.
+
+```bash
+brew install --cask kargnas/tap/mac-optimizer-loop
+```
+
+> _cask + DMG는 첫 서명 릴리스 후 활성화됨. 릴리스 파이프라인은 연결돼 있고 서명 secret 입력을 기다리는 중 — [docs/release-setup.md](docs/release-setup.md) 참고. 그 전까지는 아래 소스 빌드를 쓸 것._
+
+### 소스 빌드
 
 ```bash
 git clone https://github.com/kargnas/mac-optimizer-loop
