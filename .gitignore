@@ -6,3 +6,8 @@ dist/
 config.json
 .env
 *.key
+
+# local AI-agent / index state (never publish)
+# .codegraph is a symlink into ~/.omo, so match without a trailing slash
+.codex/
+.codegraph
