@@ -1,4 +1,4 @@
-# mac-optimizer-loop
+# mac-optimizing-looper
 
 **Every N minutes your Mac's load goes to Claude → Claude ranks what's actually eating CPU/RAM and drops the exact fix into your menu bar. One click runs it — but only after a second Claude pass clears the command as safe.**
 
@@ -15,7 +15,7 @@ A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask Cla
 
 The menu bar shows the count; the dropdown is ranked worst-first (🔴 critical → 🟡 warning → 🟢 hygiene). Each row expands into Copy / Show in Terminal / Review with Claude / Run Command Now:
 
-<p align="center"><img src="docs/menu.png" alt="mac-optimizer-loop menu — ranked, severity-colored suggestions" width="520"></p>
+<p align="center"><img src="docs/menu.png" alt="mac-optimizing-looper menu — ranked, severity-colored suggestions" width="520"></p>
 
 ## Run a fix — the gated path
 
@@ -73,7 +73,7 @@ timer → collect → claude analyze → rank suggestions
 Needs the `claude` CLI on your PATH. macOS 13+.
 
 ```bash
-brew install --cask kargnas/tap/mac-optimizer-loop
+brew install --cask kargnas/tap/mac-optimizing-looper
 ```
 
 > _The cask + DMG go live after the first signed release. The release pipeline is wired but waits on signing secrets — see [docs/release-setup.md](docs/release-setup.md). Until then, build from source below._
@@ -81,12 +81,12 @@ brew install --cask kargnas/tap/mac-optimizer-loop
 ### Build from source
 
 ```bash
-git clone https://github.com/kargnas/mac-optimizer-loop
-cd mac-optimizer-loop
+git clone https://github.com/kargnas/mac-optimizing-looper
+cd mac-optimizing-looper
 bash script/build_and_run.sh run     # builds the .app, codesigns ad-hoc, launches
 ```
 
-Run the **bundle**, not the bare binary — `UNUserNotificationCenter` needs a real bundle id (`as.kargn.MacLoadAdvisor`). Config lives at `~/.config/mac-load-advisor/config.json` (copy `config.example.json`): model, thinking level, monitor seconds, interval, terminal, language.
+Run the **bundle**, not the bare binary — `UNUserNotificationCenter` needs a real bundle id (`as.kargn.MacOptimizingLooper`). Config lives at `~/.config/mac-optimizing-looper/config.json` (copy `config.example.json`): model, thinking level, monitor seconds, interval, terminal, language.
 
 ## Limits / what it refuses
 

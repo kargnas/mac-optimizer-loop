@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidance for AI agents working on **Mac Load Advisor** — a macOS menu-bar app that
+Guidance for AI agents working on **Mac Optimizing Looper** — a macOS menu-bar app that
 periodically analyzes system load with Claude and surfaces prioritized advice.
 
 ## Build / Run
@@ -10,13 +10,13 @@ periodically analyzes system load with Claude and surfaces prioritized advice.
   ```bash
   bash script/build_and_run.sh run
   ```
-  This builds `dist/MacLoadAdvisor.app`, codesigns it ad-hoc, and `open -n`s it. The
-  bundle id is `as.kargn.MacLoadAdvisor`; it is `LSUIElement` (no Dock icon).
+  This builds `dist/MacOptimizingLooper.app`, codesigns it ad-hoc, and `open -n`s it. The
+  bundle id is `as.kargn.MacOptimizingLooper`; it is `LSUIElement` (no Dock icon).
 - **Why the bundle matters:** `UNUserNotificationCenter` needs a real bundle proxy. A
-  bare `.build/.../MacLoadAdvisor` binary has no bundle id, so notifications silently
+  bare `.build/.../MacOptimizingLooper` binary has no bundle id, so notifications silently
   fail there. Code guards on `Bundle.main.bundleIdentifier != nil` and falls back to
   opening the result window directly — but for real testing, run the bundle.
-- Config lives at `~/.config/mac-load-advisor/config.json` and is read once at launch
+- Config lives at `~/.config/mac-optimizing-looper/config.json` and is read once at launch
   (`AppConfig.loadDefault()`). After editing config by hand, **restart the app**.
 - `thinkingLevel` (config) = Claude `--effort` for the **analysis pass** only
   (low/medium/high/xhigh/max, default `max`; invalid values clamp to `max`). The JSON
@@ -28,7 +28,7 @@ periodically analyzes system load with Claude and surfaces prioritized advice.
 
 ## Release pipeline
 
-`script/build-app.zsh` packages a distributable `dist/MacLoadAdvisor.app` (release
+`script/build-app.zsh` packages a distributable `dist/MacOptimizingLooper.app` (release
 build + version-stamped `Info.plist`). Local default is ad-hoc sign; CI sets
 `CODE_SIGN_IDENTITY="Developer ID Application"` + `HARDENED_RUNTIME=1` for a
 notarizable bundle. Keep it separate from `build_and_run.sh` (that is the fast
@@ -41,7 +41,7 @@ Sparkle in-app auto-update is intentionally not wired yet (needs app-target chan
 ## Terminal Launching — single entry point
 
 All terminal-opening features (Show Command in Terminal, Claude review) go through
-**`TerminalLauncher`** (`Sources/MacLoadAdvisor/TerminalLauncher.swift`). Do not open
+**`TerminalLauncher`** (`Sources/MacOptimizingLooper/TerminalLauncher.swift`). Do not open
 terminals directly from `AppDelegate` or anywhere else — extend `TerminalLauncher`.
 
 - Terminal resolution: `TerminalAppCatalog.application(bundleIdentifier:)`.
@@ -97,7 +97,7 @@ enforced by `GuardrailTests`.
   the user didn't choose without telling them.
 - i18n: `AppStrings` is the only place for user-facing text (English + Korean). Add new
   strings there, never hardcode UI text in views/controllers.
-- Tests: `Tests/MacLoadAdvisorCoreTests`. Keep `GuardrailTests` green — it encodes the
+- Tests: `Tests/MacOptimizingLooperCoreTests`. Keep `GuardrailTests` green — it encodes the
   safety contract. Update it deliberately when the contract intentionally changes.
 - Bundle id prefix for any new bundles: keep `as.kargn.*` consistent with the
   existing app bundle.

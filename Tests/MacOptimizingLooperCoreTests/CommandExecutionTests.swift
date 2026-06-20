@@ -1,5 +1,5 @@
 import XCTest
-@testable import MacLoadAdvisorCore
+@testable import MacOptimizingLooperCore
 
 final class CommandExecutionTests: XCTestCase {
     // MARK: - sudo detection (decides whether the GUI password prompt is used)

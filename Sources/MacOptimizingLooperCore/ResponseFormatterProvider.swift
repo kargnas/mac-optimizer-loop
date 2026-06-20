@@ -27,7 +27,7 @@ public struct ShellResponseFormatterProvider: ResponseFormatting {
 
         let fileManager = FileManager.default
         let runDirectory = fileManager.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-formatter-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("mac-optimizing-looper-formatter-\(UUID().uuidString)", isDirectory: true)
         try fileManager.createDirectory(at: runDirectory, withIntermediateDirectories: true)
 
         let analysisURL = runDirectory.appendingPathComponent("analysis.txt")
@@ -88,12 +88,12 @@ public struct ShellResponseFormatterProvider: ResponseFormatting {
         if let configured = environment["MAC_LOAD_ADVISOR_FORMAT_JSON"], !configured.isEmpty {
             paths.append(configured)
         }
-        if let resourceURL = Bundle.main.resourceURL?.appendingPathComponent("mac-load-advisor-format-json.sh") {
+        if let resourceURL = Bundle.main.resourceURL?.appendingPathComponent("mac-optimizing-looper-format-json.sh") {
             paths.append(resourceURL.path)
         }
 
         let current = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-        paths.append(current.appendingPathComponent("script/mac-load-advisor-format-json.sh").path)
+        paths.append(current.appendingPathComponent("script/mac-optimizing-looper-format-json.sh").path)
 
         var seen = Set<String>()
         return paths.compactMap { path in

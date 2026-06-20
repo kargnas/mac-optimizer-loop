@@ -66,7 +66,7 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "APP_VERSION=${VERSION#v}" >> "$GITHUB_ENV"
-          echo "DMG_NAME=MacLoadAdvisor-${VERSION}.dmg" >> "$GITHUB_ENV"
+          echo "DMG_NAME=MacOptimizingLooper-${VERSION}.dmg" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Import Developer ID certificate
@@ -100,22 +100,22 @@ jobs:
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          ditto -c -k --keepParent dist/MacLoadAdvisor.app "$RUNNER_TEMP/app-notarize.zip"
+          ditto -c -k --keepParent dist/MacOptimizingLooper.app "$RUNNER_TEMP/app-notarize.zip"
           xcrun notarytool submit "$RUNNER_TEMP/app-notarize.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_APP_PASSWORD" \
             --team-id "$APPLE_TEAM_ID" \
             --wait --timeout 30m
-          xcrun stapler staple dist/MacLoadAdvisor.app
+          xcrun stapler staple dist/MacOptimizingLooper.app
 
       - name: Create DMG
         run: |
           # Stage only the .app so build artifacts never leak into the DMG.
           DMG_STAGING="$RUNNER_TEMP/dmg_staging"
           mkdir -p "$DMG_STAGING"
-          cp -R dist/MacLoadAdvisor.app "$DMG_STAGING/"
+          cp -R dist/MacOptimizingLooper.app "$DMG_STAGING/"
           ln -s /Applications "$DMG_STAGING/Applications"
-          hdiutil create -volname "MacLoadAdvisor" \
+          hdiutil create -volname "MacOptimizingLooper" \
             -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_NAME"
           codesign --force --sign "Developer ID Application" "$DMG_NAME"
           rm -rf "$DMG_STAGING"
@@ -141,11 +141,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          files: MacLoadAdvisor-*.dmg
+          files: MacOptimizingLooper-*.dmg
           generate_release_notes: true
 
   # Create or bump the Homebrew cask in kargnas/homebrew-tap so
-  # `brew install --cask kargnas/tap/mac-optimizer-loop` resolves to this DMG.
+  # `brew install --cask kargnas/tap/mac-optimizing-looper` resolves to this DMG.
   # Needs a write deploy key (TAP_SSH_KEY); GITHUB_TOKEN cannot push cross-repo.
   update-tap:
     needs: release
@@ -160,7 +160,7 @@ jobs:
           APP_VERSION="${VERSION#v}"
 
           curl -fsSL -o app.dmg \
-            "https://github.com/kargnas/mac-optimizer-loop/releases/download/${VERSION}/MacLoadAdvisor-${VERSION}.dmg"
+            "https://github.com/kargnas/mac-optimizing-looper/releases/download/${VERSION}/MacOptimizingLooper-${VERSION}.dmg"
           SHA256=$(sha256sum app.dmg | cut -d' ' -f1)
 
           mkdir -p ~/.ssh
@@ -174,15 +174,15 @@ jobs:
           # Generate the whole cask each release (create-or-replace) so the first
           # release bootstraps it and later releases keep version+sha in sync.
           mkdir -p tap/Casks
-          cat > tap/Casks/mac-optimizer-loop.rb <<CASK
-          cask "mac-optimizer-loop" do
+          cat > tap/Casks/mac-optimizing-looper.rb <<CASK
+          cask "mac-optimizing-looper" do
             version "${APP_VERSION}"
             sha256 "${SHA256}"
 
-            url "https://github.com/kargnas/mac-optimizer-loop/releases/download/v#{version}/MacLoadAdvisor-v#{version}.dmg"
-            name "Mac Optimizer Loop"
+            url "https://github.com/kargnas/mac-optimizing-looper/releases/download/v#{version}/MacOptimizingLooper-v#{version}.dmg"
+            name "Mac Optimizing Looper"
             desc "Menu-bar agent loop that asks Claude what's overloading your Mac"
-            homepage "https://github.com/kargnas/mac-optimizer-loop"
+            homepage "https://github.com/kargnas/mac-optimizing-looper"
 
             livecheck do
               url :url
@@ -191,13 +191,13 @@ jobs:
 
             depends_on macos: ">= :ventura"
 
-            app "MacLoadAdvisor.app"
+            app "MacOptimizingLooper.app"
 
             zap trash: [
-              "~/.config/mac-load-advisor",
-              "~/Library/Caches/as.kargn.MacLoadAdvisor",
-              "~/Library/HTTPStorages/as.kargn.MacLoadAdvisor",
-              "~/Library/Preferences/as.kargn.MacLoadAdvisor.plist",
+              "~/.config/mac-optimizing-looper",
+              "~/Library/Caches/as.kargn.MacOptimizingLooper",
+              "~/Library/HTTPStorages/as.kargn.MacOptimizingLooper",
+              "~/Library/Preferences/as.kargn.MacOptimizingLooper.plist",
             ]
           end
           CASK
@@ -205,9 +205,9 @@ jobs:
           cd tap
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Casks/mac-optimizer-loop.rb
+          git add Casks/mac-optimizing-looper.rb
           # A re-run of an already-published version yields no diff; skip rather than fail.
           git diff --cached --quiet || {
-            git commit -m "mac-optimizer-loop ${APP_VERSION}"
+            git commit -m "mac-optimizing-looper ${APP_VERSION}"
             git push origin HEAD:main
           }

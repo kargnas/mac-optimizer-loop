@@ -2,8 +2,8 @@
 set -euo pipefail
 
 MODE="${1:-run}"
-APP_NAME="MacLoadAdvisor"
-BUNDLE_ID="as.kargn.MacLoadAdvisor"
+APP_NAME="MacOptimizingLooper"
+BUNDLE_ID="as.kargn.MacOptimizingLooper"
 MIN_SYSTEM_VERSION="13.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -14,8 +14,8 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
-RESPONSE_GUIDE_SCRIPT="$ROOT_DIR/script/mac-load-advisor-response-guide.sh"
-RESPONSE_FORMAT_SCRIPT="$ROOT_DIR/script/mac-load-advisor-format-json.sh"
+RESPONSE_GUIDE_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-response-guide.sh"
+RESPONSE_FORMAT_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-format-json.sh"
 
 cd "$ROOT_DIR"
 
@@ -33,10 +33,10 @@ mkdir -p "$APP_MACOS"
 mkdir -p "$APP_RESOURCES"
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
-cp "$RESPONSE_GUIDE_SCRIPT" "$APP_RESOURCES/mac-load-advisor-response-guide.sh"
-chmod +x "$APP_RESOURCES/mac-load-advisor-response-guide.sh"
-cp "$RESPONSE_FORMAT_SCRIPT" "$APP_RESOURCES/mac-load-advisor-format-json.sh"
-chmod +x "$APP_RESOURCES/mac-load-advisor-format-json.sh"
+cp "$RESPONSE_GUIDE_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-response-guide.sh"
+chmod +x "$APP_RESOURCES/mac-optimizing-looper-response-guide.sh"
+cp "$RESPONSE_FORMAT_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-format-json.sh"
+chmod +x "$APP_RESOURCES/mac-optimizing-looper-format-json.sh"
 
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

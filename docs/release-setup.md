@@ -9,7 +9,7 @@ ID sign → notarize → DMG → GitHub Release → `update-tap` writes the cask
 
 ## Required repo secrets
 
-Add under **Settings → Secrets and variables → Actions** of `kargnas/mac-optimizer-loop`.
+Add under **Settings → Secrets and variables → Actions** of `kargnas/mac-optimizing-looper`.
 
 | Secret | What it is | How to get it |
 |---|---|---|
@@ -33,14 +33,14 @@ After the secrets are in:
 gh workflow run auto-release.yml -f bump=minor    # → v0.1.0
 ```
 
-`update-tap` **creates** `Casks/mac-optimizer-loop.rb` in the tap on the first run
+`update-tap` **creates** `Casks/mac-optimizing-looper.rb` in the tap on the first run
 (no need to pre-add it), then keeps `version` + `sha256` in sync on every release.
 
-Then `brew install --cask kargnas/tap/mac-optimizer-loop` works.
+Then `brew install --cask kargnas/tap/mac-optimizing-looper` works.
 
 ## Not wired yet (future "full line")
 
 - **Sparkle in-app auto-update.** cctrans embeds Sparkle (a `SUFeedURL` + EdDSA
   public key in `Info.plist`) and publishes an `appcast.xml` per release. That is a
   code change to the app target, not just CI, so it is intentionally left out here.
-  Until then, updates come via `brew upgrade --cask mac-optimizer-loop`.
+  Until then, updates come via `brew upgrade --cask mac-optimizing-looper`.

@@ -1,5 +1,5 @@
 import AppKit
-import MacLoadAdvisorCore
+import MacOptimizingLooperCore
 import UserNotifications
 
 @MainActor
@@ -559,7 +559,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 outputLanguageIdentifier: config.resolvedOutputLanguageIdentifier()
             )
             let promptURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("mac-load-advisor-claude-review-\(UUID().uuidString).txt")
+                .appendingPathComponent("mac-optimizing-looper-claude-review-\(UUID().uuidString).txt")
             try prompt.write(to: promptURL, atomically: true, encoding: .utf8)
             let script = TerminalScriptBuilder.claudeReviewScript(
                 promptFilePath: promptURL.path,

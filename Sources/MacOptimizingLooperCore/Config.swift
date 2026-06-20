@@ -119,7 +119,7 @@ public struct AppConfig: Equatable {
 
     public static var defaultConfigURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".config/mac-load-advisor/config.json")
+            .appendingPathComponent(".config/mac-optimizing-looper/config.json")
     }
 
     public func saveDefault() throws {

@@ -22,7 +22,7 @@ public enum TerminalScriptBuilder {
         let command = suggestion.suggestedCommand?.trimmingCharacters(in: .whitespacesAndNewlines)
         return """
         You are a hands-on macOS performance assistant in an interactive terminal session,
-        opened from the "Mac Load Advisor" app about the suggestion below.
+        opened from the "Mac Optimizing Looper" app about the suggestion below.
 
         Output language: \(outputLanguageIdentifier). Write everything in this language.
 
@@ -36,9 +36,9 @@ public enum TerminalScriptBuilder {
         system yourself with read-only commands (top CPU/memory processes, memory pressure,
         runaway daemons, login/launch items, large caches and disk hogs), explain what you
         find, and help them clean it up step by step. Ask for explicit confirmation before
-        running anything destructive. Never claim the Mac Load Advisor app already ran anything.
+        running anything destructive. Never claim the Mac Optimizing Looper app already ran anything.
 
-        --- Suggestion from Mac Load Advisor ---
+        --- Suggestion from Mac Optimizing Looper ---
         Severity: \(suggestion.severity.displayText) (\(suggestion.severity.id))
         Title: \(suggestion.title)
         Detail: \(suggestion.detail)

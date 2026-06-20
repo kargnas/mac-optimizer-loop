@@ -28,11 +28,11 @@ public struct ClaudeCLIClient: LLMClient {
 
     private func runClaude(_ request: ChatRequest, executableURL: URL) throws -> String {
         let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-claude-\(UUID().uuidString).out")
+            .appendingPathComponent("mac-optimizing-looper-claude-\(UUID().uuidString).out")
         let errorURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-claude-\(UUID().uuidString).err")
+            .appendingPathComponent("mac-optimizing-looper-claude-\(UUID().uuidString).err")
         let inputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-claude-\(UUID().uuidString).in")
+            .appendingPathComponent("mac-optimizing-looper-claude-\(UUID().uuidString).in")
         try request.user.data(using: .utf8)?.write(to: inputURL, options: .atomic)
         FileManager.default.createFile(atPath: outputURL.path, contents: nil)
         FileManager.default.createFile(atPath: errorURL.path, contents: nil)

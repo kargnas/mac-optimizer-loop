@@ -12,7 +12,7 @@ public struct AppStrings {
     }
 
     public var appAccessibilityDescription: String { isKorean ? "부하 어드바이저" : "Load Advisor" }
-    public var appTooltip: String { isKorean ? "Mac 부하 어드바이저" : "Mac Load Advisor" }
+    public var appTooltip: String { isKorean ? "Mac 부하 어드바이저" : "Mac Optimizing Looper" }
     public var analysisWaiting: String { isKorean ? "분석 대기 중" : "Waiting for analysis" }
     public var configurationWarningTitle: String { isKorean ? "⚠️ 설정 파일 오류 — 기본값으로 실행 중" : "⚠️ Config file error — running with defaults" }
     public var analyzing: String { isKorean ? "분석 중…" : "Analyzing..." }
@@ -69,7 +69,7 @@ public struct AppStrings {
     public var memoryShortLabel: String { isKorean ? "메모리" : "MEM" }
     public var reasonLabel: String { isKorean ? "이유" : "Reason" }
     public var macOptimizerFailedPrefix: String { isKorean ? "mac-optimizer 실패" : "mac-optimizer failed" }
-    public var settingsWindowTitle: String { isKorean ? "Mac Load Advisor 설정" : "Mac Load Advisor Settings" }
+    public var settingsWindowTitle: String { isKorean ? "Mac Optimizing Looper 설정" : "Mac Optimizing Looper Settings" }
     public var claudeModelLabel: String { isKorean ? "Claude 모델" : "Claude Model" }
     public var thinkingLevelLabel: String { isKorean ? "추론 강도" : "Thinking Level" }
     public var analysisIntervalLabel: String { isKorean ? "분석 주기" : "Analysis Interval" }
@@ -104,9 +104,9 @@ public struct AppStrings {
     }
     public var save: String { isKorean ? "저장" : "Save" }
     public var cancel: String { isKorean ? "취소" : "Cancel" }
-    public var terminalCommandHeader: String { isKorean ? "Mac Load Advisor 제안 명령어(실행 안 함):" : "Mac Load Advisor suggested command (not executed):" }
+    public var terminalCommandHeader: String { isKorean ? "Mac Optimizing Looper 제안 명령어(실행 안 함):" : "Mac Optimizing Looper suggested command (not executed):" }
     public var terminalCommandFooter: String { isKorean ? "검토 후 필요할 때만 직접 붙여넣어 실행하세요." : "Review it before running. Paste/run manually only if you choose." }
-    public var claudeReviewStarting: String { isKorean ? "Claude가 Mac Load Advisor 제안을 검토하는 중입니다..." : "Claude is reviewing this Mac Load Advisor suggestion..." }
+    public var claudeReviewStarting: String { isKorean ? "Claude가 Mac Optimizing Looper 제안을 검토하는 중입니다..." : "Claude is reviewing this Mac Optimizing Looper suggestion..." }
     public var claudeNotExecutable: String { isKorean ? "설정된 경로에서 Claude CLI를 실행할 수 없습니다." : "Claude CLI is not executable at the configured path." }
     public var reviewPromptMissing: String { isKorean ? "검토 프롬프트 파일을 찾을 수 없습니다." : "Review prompt file is missing." }
 

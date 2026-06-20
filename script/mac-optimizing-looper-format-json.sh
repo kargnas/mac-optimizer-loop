@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<'USAGE'
-usage: mac-load-advisor-format-json.sh --analysis-file PATH [--language LOCALE] [--model MODEL] [--output-dir DIR] [--claude PATH]
+usage: mac-optimizing-looper-format-json.sh --analysis-file PATH [--language LOCALE] [--model MODEL] [--output-dir DIR] [--claude PATH]
 USAGE
 }
 
@@ -76,7 +76,7 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-guide_script="$script_dir/mac-load-advisor-response-guide.sh"
+guide_script="$script_dir/mac-optimizing-looper-response-guide.sh"
 
 if [ ! -x "$guide_script" ]; then
   echo "response guide script not found: $guide_script" >&2
@@ -85,7 +85,7 @@ fi
 
 mkdir -p "$output_dir"
 run_id="$(uuidgen 2>/dev/null || date +%s)"
-run_dir="$output_dir/mac-load-advisor-format-$run_id"
+run_dir="$output_dir/mac-optimizing-looper-format-$run_id"
 mkdir -p "$run_dir"
 
 prompt_path="$run_dir/prompt.txt"

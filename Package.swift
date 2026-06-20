@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "MacLoadAdvisor",
+    name: "MacOptimizingLooper",
     platforms: [
         .macOS(.v13)
     ],
     products: [
-        .library(name: "MacLoadAdvisorCore", targets: ["MacLoadAdvisorCore"]),
-        .executable(name: "MacLoadAdvisor", targets: ["MacLoadAdvisor"])
+        .library(name: "MacOptimizingLooperCore", targets: ["MacOptimizingLooperCore"]),
+        .executable(name: "MacOptimizingLooper", targets: ["MacOptimizingLooper"])
     ],
     targets: [
-        .target(name: "MacLoadAdvisorCore"),
-        .executableTarget(name: "MacLoadAdvisor", dependencies: ["MacLoadAdvisorCore"]),
-        .testTarget(name: "MacLoadAdvisorCoreTests", dependencies: ["MacLoadAdvisorCore"])
+        .target(name: "MacOptimizingLooperCore"),
+        .executableTarget(name: "MacOptimizingLooper", dependencies: ["MacOptimizingLooperCore"]),
+        .testTarget(name: "MacOptimizingLooperCoreTests", dependencies: ["MacOptimizingLooperCore"])
     ]
 )

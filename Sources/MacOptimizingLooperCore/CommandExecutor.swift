@@ -89,7 +89,7 @@ public enum CommandExecutor {
         // Drain stderr on a separate queue so a process that fills the stderr pipe
         // buffer can still make progress while we block draining stdout — reading
         // both serially could otherwise deadlock on large output.
-        let errQueue = DispatchQueue(label: "as.kargn.MacLoadAdvisor.stderr")
+        let errQueue = DispatchQueue(label: "as.kargn.MacOptimizingLooper.stderr")
         var errData = Data()
         errQueue.async { errData = errPipe.fileHandleForReading.readDataToEndOfFile() }
         let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
@@ -112,9 +112,9 @@ public enum CommandExecutor {
         let start = Date()
         let tmp = FileManager.default.temporaryDirectory
         let token = UUID().uuidString
-        let outURL = tmp.appendingPathComponent("mac-load-advisor-run-\(token).out")
-        let errURL = tmp.appendingPathComponent("mac-load-advisor-run-\(token).err")
-        let codeURL = tmp.appendingPathComponent("mac-load-advisor-run-\(token).code")
+        let outURL = tmp.appendingPathComponent("mac-optimizing-looper-run-\(token).out")
+        let errURL = tmp.appendingPathComponent("mac-optimizing-looper-run-\(token).err")
+        let codeURL = tmp.appendingPathComponent("mac-optimizing-looper-run-\(token).code")
         defer {
             try? FileManager.default.removeItem(at: outURL)
             try? FileManager.default.removeItem(at: errURL)

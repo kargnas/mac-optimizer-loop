@@ -1,5 +1,5 @@
 import XCTest
-@testable import MacLoadAdvisorCore
+@testable import MacOptimizingLooperCore
 
 final class LLMAdviceProviderTests: XCTestCase {
     func testAdviseMapsJSONSuggestionsToAdvice() async throws {

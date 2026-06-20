@@ -1,5 +1,5 @@
 import AppKit
-import MacLoadAdvisorCore
+import MacOptimizingLooperCore
 
 @MainActor
 private var retainedAppDelegate: AppDelegate?

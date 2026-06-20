@@ -1,4 +1,4 @@
-# mac-optimizer-loop
+# mac-optimizing-looper
 
 **N분마다 Mac 부하를 Claude에게 보냄 → Claude가 CPU/RAM을 실제로 잡아먹는 범인을 심각도순으로 정렬하고, 정확한 해결 명령을 메뉴바에 띄움. 클릭 한 번이면 실행되지만, 두 번째 Claude 패스가 그 명령을 SAFE로 판정한 뒤에만 실행됨.**
 
@@ -15,7 +15,7 @@ Dock 아이콘 없는 macOS 메뉴바 앱. `claude` CLI 위에서 **관찰 → C
 
 메뉴바에 개수가 뜨고, 드롭다운은 심각도 높은 순으로 정렬됨(🔴 위급 → 🟡 경고 → 🟢 위생). 각 행은 Copy / Show in Terminal / Review with Claude / Run Command Now로 펼쳐짐:
 
-<p align="center"><img src="docs/menu.png" alt="mac-optimizer-loop 메뉴 — 심각도 색상별 정렬 제안" width="520"></p>
+<p align="center"><img src="docs/menu.png" alt="mac-optimizing-looper 메뉴 — 심각도 색상별 정렬 제안" width="520"></p>
 
 ## 해결 실행 — 게이트가 걸린 경로
 
@@ -73,7 +73,7 @@ MUST NOT: claim anything was executed — the app never auto-runs.
 PATH 위의 `claude` CLI 필요. macOS 13+.
 
 ```bash
-brew install --cask kargnas/tap/mac-optimizer-loop
+brew install --cask kargnas/tap/mac-optimizing-looper
 ```
 
 > _cask + DMG는 첫 서명 릴리스 후 활성화됨. 릴리스 파이프라인은 연결돼 있고 서명 secret 입력을 기다리는 중 — [docs/release-setup.md](docs/release-setup.md) 참고. 그 전까지는 아래 소스 빌드를 쓸 것._
@@ -81,12 +81,12 @@ brew install --cask kargnas/tap/mac-optimizer-loop
 ### 소스 빌드
 
 ```bash
-git clone https://github.com/kargnas/mac-optimizer-loop
-cd mac-optimizer-loop
+git clone https://github.com/kargnas/mac-optimizing-looper
+cd mac-optimizing-looper
 bash script/build_and_run.sh run     # .app 빌드, ad-hoc 코드사인, 실행
 ```
 
-bare 바이너리가 아니라 **번들**로 실행할 것 — `UNUserNotificationCenter`는 실제 bundle id(`as.kargn.MacLoadAdvisor`)가 필요함. 설정은 `~/.config/mac-load-advisor/config.json`에 있음(`config.example.json` 복사): model, thinking level, monitor seconds, interval, terminal, language.
+bare 바이너리가 아니라 **번들**로 실행할 것 — `UNUserNotificationCenter`는 실제 bundle id(`as.kargn.MacOptimizingLooper`)가 필요함. 설정은 `~/.config/mac-optimizing-looper/config.json`에 있음(`config.example.json` 복사): model, thinking level, monitor seconds, interval, terminal, language.
 
 ## 한계 / 거부하는 것
 

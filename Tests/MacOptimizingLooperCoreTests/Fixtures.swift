@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import MacLoadAdvisorCore
+@testable import MacOptimizingLooperCore
 
 enum Fixtures {
     static let snapshot = SystemSnapshot(

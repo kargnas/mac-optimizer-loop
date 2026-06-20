@@ -55,9 +55,9 @@ public enum MacOptimizerScript {
         timeoutSeconds: TimeInterval
     ) throws -> String {
         let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-mac-optimizer-\(UUID().uuidString).out")
+            .appendingPathComponent("mac-optimizing-looper-mac-optimizer-\(UUID().uuidString).out")
         let errorURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-mac-optimizer-\(UUID().uuidString).err")
+            .appendingPathComponent("mac-optimizing-looper-mac-optimizer-\(UUID().uuidString).err")
         FileManager.default.createFile(atPath: outputURL.path, contents: nil)
         FileManager.default.createFile(atPath: errorURL.path, contents: nil)
         defer {

@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# Release packager — builds a distributable dist/MacLoadAdvisor.app.
+# Release packager — builds a distributable dist/MacOptimizingLooper.app.
 #
 # Local default = ad-hoc sign ("-"): fine for testing on THIS Mac, but Gatekeeper
 # blocks it on any other Mac. CI (.github/workflows/build-release.yml) sets
@@ -8,8 +8,8 @@
 # that script targets the fast local dev loop (debug build, no version stamping).
 set -euo pipefail
 
-APP_NAME="MacLoadAdvisor"
-BUNDLE_ID="as.kargn.MacLoadAdvisor"
+APP_NAME="MacOptimizingLooper"
+BUNDLE_ID="as.kargn.MacOptimizingLooper"
 MIN_SYSTEM_VERSION="13.0"
 APP_VERSION="${APP_VERSION:-0.0.0}"             # CFBundleShortVersionString / CFBundleVersion
 CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}"   # "-" == ad-hoc
@@ -35,7 +35,7 @@ cp "$BUILD_BINARY" "$APP_MACOS/$APP_NAME"
 chmod +x "$APP_MACOS/$APP_NAME"
 
 # The formatter/guide scripts are loaded from the bundle Resources at runtime.
-for s in mac-load-advisor-response-guide.sh mac-load-advisor-format-json.sh; do
+for s in mac-optimizing-looper-response-guide.sh mac-optimizing-looper-format-json.sh; do
   cp "$ROOT_DIR/script/$s" "$APP_RESOURCES/$s"
   chmod +x "$APP_RESOURCES/$s"
 done

@@ -1,5 +1,5 @@
 import AppKit
-import MacLoadAdvisorCore
+import MacOptimizingLooperCore
 
 enum TerminalLaunchError: Error {
     /// The configured terminal could not be resolved. We surface this instead of
@@ -44,7 +44,7 @@ struct TerminalLauncher {
 
     private func writeCommandFile(script: String) throws -> URL {
         let scriptURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-load-advisor-terminal-\(UUID().uuidString).command")
+            .appendingPathComponent("mac-optimizing-looper-terminal-\(UUID().uuidString).command")
         let wrappedScript = """
         #!/bin/zsh
         _mac_load_advisor_script="$0"

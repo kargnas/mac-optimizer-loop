@@ -1,5 +1,5 @@
 import AppKit
-import MacLoadAdvisorCore
+import MacOptimizingLooperCore
 
 /// Shows the full stdout/stderr/exit-code of a user-run command. One reusable
 /// window: a later result replaces the text instead of stacking windows.

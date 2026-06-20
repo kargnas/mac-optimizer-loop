@@ -1,5 +1,5 @@
 import XCTest
-@testable import MacLoadAdvisorCore
+@testable import MacOptimizingLooperCore
 
 final class GuardrailTests: XCTestCase {
     func testActionPolicyIsUserInitiatedWithSafeguards() {
@@ -31,13 +31,13 @@ final class GuardrailTests: XCTestCase {
     }
 
     func testTerminalDisplayScriptPrintsSuggestedCommandWithoutExecutingIt() {
-        let command = "touch /tmp/mac-load-advisor-test; echo 'ran'"
+        let command = "touch /tmp/mac-optimizing-looper-test; echo 'ran'"
 
         let script = TerminalScriptBuilder.suggestedCommandDisplayScript(command: command, languageIdentifier: "en-US")
 
         XCTAssertTrue(script.contains("not executed"))
         XCTAssertTrue(script.contains("printf '%s\\n\\n' \(TerminalScriptBuilder.shellQuoted(command))"))
-        XCTAssertFalse(script.contains("\ntouch /tmp/mac-load-advisor-test"))
+        XCTAssertFalse(script.contains("\ntouch /tmp/mac-optimizing-looper-test"))
     }
 
     func testClaudeReviewScriptOpensInteractiveSessionFromPromptFile() {

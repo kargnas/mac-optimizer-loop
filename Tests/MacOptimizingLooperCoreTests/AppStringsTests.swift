@@ -1,5 +1,5 @@
 import XCTest
-@testable import MacLoadAdvisorCore
+@testable import MacOptimizingLooperCore
 
 final class AppStringsTests: XCTestCase {
     func testAnalyzingElapsedFormatsKoreanDurations() {

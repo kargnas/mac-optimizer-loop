@@ -1,5 +1,5 @@
 import AppKit
-import MacLoadAdvisorCore
+import MacOptimizingLooperCore
 
 @MainActor
 final class SettingsWindowController: NSWindowController {
