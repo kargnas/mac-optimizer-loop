@@ -2,7 +2,9 @@
 
 **Every N minutes your Mac's load goes to Claude → Claude ranks what's actually eating CPU/RAM and drops the exact fix into your menu bar. One click runs it — but only after a second Claude pass clears the command as safe.**
 
-A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask Claude → advise → (optionally) act** loop on top of the `claude` CLI. It never touches your system on its own; every action is one explicit, risk-checked click.
+A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask the model → advise → (optionally) act** loop on top of a local LLM CLI. It never touches your system on its own; every action is one explicit, risk-checked click.
+
+**Providers:** the default backend is the `claude` CLI; the `codex` CLI is also supported. Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read live from each CLI. With codex, the analysis is a single schema-constrained pass (no separate format pass).
 
 ## The loop, one cycle
 

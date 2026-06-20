@@ -29,25 +29,45 @@ public struct LLMAdviceProvider: AdviceProviding {
     private let client: LLMClient
     private let config: AppConfig
     private let responseFormatter: ResponseFormatting
+    /// True when the provider returns schema-constrained JSON itself (codex), so the
+    /// free-form → formatter second pass is skipped. False = claude two-pass.
+    private let supportsStructuredOutput: Bool
 
     public init(
         client: LLMClient,
         config: AppConfig = AppConfig.defaults(environment: [:]),
-        responseFormatter: ResponseFormatting = ShellResponseFormatterProvider()
+        responseFormatter: ResponseFormatting = ShellResponseFormatterProvider(),
+        supportsStructuredOutput: Bool = false
     ) {
         self.client = client
         self.config = config
         self.responseFormatter = responseFormatter
+        self.supportsStructuredOutput = supportsStructuredOutput
     }
 
     public func advise(for snapshot: SystemSnapshot, optimizerReport: MacOptimizerReport? = nil) async throws -> Advice {
         let languageIdentifier = config.resolvedOutputLanguageIdentifier()
+        // Structured providers receive the formatting guide + JSON schema and return the
+        // final JSON in one call. Free-form providers return analysis notes that the
+        // formatter second pass turns into JSON.
+        let systemPrompt: String
+        if supportsStructuredOutput {
+            systemPrompt = PromptBuilder.analysisSystemPrompt(outputLanguageIdentifier: languageIdentifier)
+                + "\n\n"
+                + PromptBuilder.responseFormatGuide(outputLanguageIdentifier: languageIdentifier)
+        } else {
+            systemPrompt = PromptBuilder.analysisSystemPrompt(outputLanguageIdentifier: languageIdentifier)
+        }
+
         let analysisResponse = try await client.complete(ChatRequest(
             model: config.model,
-            system: PromptBuilder.analysisSystemPrompt(outputLanguageIdentifier: languageIdentifier),
+            system: systemPrompt,
             user: PromptBuilder.userPrompt(for: snapshot, optimizerReport: optimizerReport),
             maxTokens: config.maxTokens,
-            temperature: config.temperature
+            temperature: config.temperature,
+            effort: config.thinkingLevel,
+            fastMode: config.fastMode,
+            outputSchema: supportsStructuredOutput ? PromptBuilder.adviceJSONSchema : nil
         ))
 
         guard let analysis = analysisResponse.choices.first?.message.content,
@@ -55,11 +75,14 @@ public struct LLMAdviceProvider: AdviceProviding {
             throw LLMError.invalidResponse
         }
 
-        let content = try responseFormatter.format(
-            analysis: analysis,
-            languageIdentifier: languageIdentifier,
-            model: config.model
-        )
+        // Structured output is already JSON; only the free-form path needs the formatter.
+        let content = supportsStructuredOutput
+            ? analysis
+            : try responseFormatter.format(
+                analysis: analysis,
+                languageIdentifier: languageIdentifier,
+                model: config.model
+            )
 
         guard let data = Self.extractJSONObject(from: content).data(using: .utf8),
               let decoded = try? JSONDecoder().decode(LLMAdviceResponse.self, from: data) else {

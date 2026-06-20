@@ -3,16 +3,13 @@ import Foundation
 public struct ClaudeCLIClient: LLMClient {
     private let executableURL: URL?
     private let environment: [String: String]
-    private let effort: String
 
     public init(
         executableURL: URL? = nil,
-        environment: [String: String] = ProcessInfo.processInfo.environment,
-        effort: String = "low"
+        environment: [String: String] = ProcessInfo.processInfo.environment
     ) {
         self.executableURL = executableURL
         self.environment = environment
-        self.effort = effort
     }
 
     public func complete(_ request: ChatRequest) async throws -> ChatResponse {
@@ -82,11 +79,12 @@ public struct ClaudeCLIClient: LLMClient {
     }
 
     private func arguments(for request: ChatRequest) -> [String] {
+        let effort = request.effort.trimmingCharacters(in: .whitespacesAndNewlines)
         var arguments = [
             "-p",
             "--no-session-persistence",
             "--output-format", "text",
-            "--effort", effort,
+            "--effort", effort.isEmpty ? "low" : effort,
             "--system-prompt", request.system
         ]
         let model = request.model.trimmingCharacters(in: .whitespacesAndNewlines)

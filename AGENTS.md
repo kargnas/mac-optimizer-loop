@@ -18,9 +18,15 @@ periodically analyzes system load with Claude and surfaces prioritized advice.
   opening the result window directly — but for real testing, run the bundle.
 - Config lives at `~/.config/mac-optimizing-looper/config.json` and is read once at launch
   (`AppConfig.loadDefault()`). After editing config by hand, **restart the app**.
-- `thinkingLevel` (config) = Claude `--effort` for the **analysis pass** only
-  (low/medium/high/xhigh/max, default `max`; invalid values clamp to `max`). The JSON
-  formatter and the command risk-check stay at `low` by design (mechanical / fast gate).
+- `provider` (config, default `claude`) selects the LLM backend (`claude`|`codex`); an
+  absent/unknown value resolves to `claude` so old configs keep working. See **LLM
+  providers** below.
+- `thinkingLevel` (config) = the reasoning level for the **analysis pass**, provider-relative
+  (claude `--effort`, codex `model_reasoning_effort`; low/medium/high/xhigh/max, default
+  `max`; invalid values clamp to `max`). The claude JSON formatter and the command
+  risk-check stay at `low` by design (mechanical / fast gate).
+- `fastMode` (config, default false) requests the provider's faster service tier when the
+  selected model supports it (codex priority tier). No-op for claude (the CLI has no fast flag).
 - `monitorSeconds` (config, default 30, clamped 0–600) = how long the mac-optimizer
   **sustained monitor** samples before evaluating. `MacOptimizerScript.runIfAvailable`
   runs the one-shot snapshot AND, when `monitorSeconds > 0`, a second `--monitor N`
@@ -36,7 +42,8 @@ debug dev loop). `.github/workflows/auto-release.yml` bumps the patch version on
 pushes to `main` and dispatches `build-release.yml` (build → sign → notarize → DMG
 → GitHub Release → `update-tap` writes the `kargnas/homebrew-tap` cask). The
 pipeline is **inert until signing secrets exist** — see `docs/release-setup.md`.
-Sparkle in-app auto-update is intentionally not wired yet (needs app-target changes).
+Sparkle in-app auto-update is wired (release builds set `SPARKLE_AUTO=1`; the feed is
+the `latest` release's `appcast.xml`). The EdDSA key is one-time — never regenerate it.
 
 ## Terminal Launching — single entry point
 
@@ -72,6 +79,33 @@ There is **no `claude run` subcommand**.
     review prompt (`claudeReviewPrompt`) is a proactive performance assistant: it
     assesses the command, then offers to inspect and clean up the system with the
     user's confirmation — not a narrow command-only reviewer.
+
+## LLM providers — abstraction & adding one
+
+The app drives an LLM **CLI**, not an API. Backends sit behind `LLMProviderKind`
+(`claude`|`codex`) and `ProviderRegistry` (`makeClient` / `catalog`). Every in-app LLM
+call (analysis, risk-check, terminal review) routes through the selected provider; the
+default is `claude`. Design doc: `docs/superpowers/specs/2026-06-20-multi-provider-llm-design.md`.
+
+- **Capabilities** live on `LLMProviderKind`. `supportsStructuredOutput` decides the
+  advice pipeline: codex returns schema-constrained JSON via `--output-schema` in one
+  pass (`PromptBuilder.adviceJSONSchema` + `responseFormatGuide`); claude returns
+  free-form text that the **two-pass** `format-json.sh` turns into JSON. Keep
+  `PromptBuilder.responseFormatGuide` and `script/mac-optimizing-looper-response-guide.sh`
+  in sync — they encode the same rules for the two paths.
+- **Catalog** is dynamic: `CodexModelCatalog` parses `~/.codex/models_cache.json`
+  (`$CODEX_HOME` honored); `ClaudeModelCatalog` is curated (the claude CLI has no list
+  command). Missing data → empty catalog → settings offers free-text "Custom…". Never
+  hardcode codex model names.
+- **codex invocation** (`CodexCLIClient`): `codex exec -m <model> -c
+  model_reasoning_effort="<effort>" [-c service_tier="priority"] --skip-git-repo-check
+  -s read-only [--output-schema <file>] -o <file> "<system+user>" </dev/null`. codex has
+  no `--system` flag (prompts are concatenated) and ignores `temperature`/`maxTokens`.
+  stdin MUST be `/dev/null` or codex blocks. The `service_tier` config key was verified
+  with `--strict-config`; do not guess codex config keys.
+- **Adding a provider**: new `LLMClient` + `ProviderCataloging`, one `LLMProviderKind`
+  case with its capability flags, and a `ProviderRegistry` branch. Settings cascades
+  Provider → Model → Effort → Fast Mode automatically from the catalog.
 
 ## Command execution & safety model
 

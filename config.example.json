@@ -1,6 +1,8 @@
 {
+  "provider": "claude",
   "model": "sonnet",
   "thinkingLevel": "max",
+  "fastMode": false,
   "monitorSeconds": 30,
   "intervalSeconds": 3600,
   "terminalAppBundleIdentifier": "com.apple.Terminal",

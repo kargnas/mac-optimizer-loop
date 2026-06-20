@@ -84,6 +84,48 @@ public enum TerminalScriptBuilder {
         """
     }
 
+    /// codex counterpart of `claudeReviewScript`: opens an INTERACTIVE codex session
+    /// (not `exec`) seeded with the review prompt, so the user can read the assessment
+    /// and keep chatting. codex has no system-prompt flag, so the prompt carries all
+    /// instructions (see `claudeReviewPrompt`, which is provider-neutral).
+    public static func codexReviewScript(
+        promptFilePath: String,
+        codexExecutablePath: String,
+        model: String,
+        effort: String,
+        fastMode: Bool,
+        languageIdentifier: String = Locale.preferredLanguages.first ?? Locale.current.identifier
+    ) -> String {
+        let text = AppStrings(languageIdentifier: languageIdentifier)
+        let model = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        let effort = effort.trimmingCharacters(in: .whitespacesAndNewlines)
+        var optionArgs = ""
+        if !model.isEmpty { optionArgs += " -m \(shellQuoted(model))" }
+        if !effort.isEmpty { optionArgs += " -c \(shellQuoted("model_reasoning_effort=\"\(effort)\""))" }
+        if fastMode { optionArgs += " -c \(shellQuoted("service_tier=\"priority\""))" }
+        let promptPath = shellQuoted(promptFilePath)
+        let codexPath = shellQuoted(codexExecutablePath)
+
+        return """
+        clear
+        _mac_load_advisor_prompt=\(promptPath)
+        cleanup_prompt() { rm -f "$_mac_load_advisor_prompt" >/dev/null 2>&1 || true; }
+        trap cleanup_prompt EXIT INT TERM
+        printf '%s\\n\\n' \(shellQuoted(text.claudeReviewStarting))
+        if [ ! -x \(codexPath) ]; then
+          printf '%s\\n' \(shellQuoted(text.claudeNotExecutable))
+        elif [ ! -f "$_mac_load_advisor_prompt" ]; then
+          printf '%s\\n' \(shellQuoted(text.reviewPromptMissing))
+        else
+          \(codexPath)\(optionArgs) "$(cat "$_mac_load_advisor_prompt")"
+        fi
+        cleanup_prompt
+        trap - EXIT INT TERM
+        printf '\\n'
+        exec "${SHELL:-/bin/zsh}" -l
+        """
+    }
+
     public static func shellQuoted(_ value: String) -> String {
         guard !value.isEmpty else { return "''" }
         return "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"

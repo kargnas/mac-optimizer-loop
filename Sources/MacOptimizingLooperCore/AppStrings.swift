@@ -23,6 +23,10 @@ public struct AppStrings {
     public var quit: String { isKorean ? "종료" : "Quit" }
     public var openCommandInTerminal: String { isKorean ? "터미널에 명령어 띄우기" : "Show Command in Terminal" }
     public var reviewWithClaude: String { isKorean ? "Claude로 검토" : "Review with Claude" }
+    /// Provider-aware variant of the review action label (e.g. "Codex로 검토").
+    public func reviewWith(provider: String) -> String {
+        isKorean ? "\(provider)로 검토" : "Review with \(provider)"
+    }
     public var copyCommand: String { isKorean ? "명령어 복사" : "Copy Command" }
     public var runCommandNow: String { isKorean ? "명령 바로 실행" : "Run Command Now" }
     public var runCommandDone: String { isKorean ? "실행 완료 · 다시 실행" : "Done · Run Again" }
@@ -72,7 +76,12 @@ public struct AppStrings {
     public var macOptimizerFailedPrefix: String { isKorean ? "mac-optimizer 실패" : "mac-optimizer failed" }
     public var settingsWindowTitle: String { isKorean ? "Mac Optimizing Looper 설정" : "Mac Optimizing Looper Settings" }
     public var claudeModelLabel: String { isKorean ? "Claude 모델" : "Claude Model" }
+    public var providerLabel: String { isKorean ? "프로바이더" : "Provider" }
+    public var modelLabel: String { isKorean ? "모델" : "Model" }
     public var thinkingLevelLabel: String { isKorean ? "추론 강도" : "Thinking Level" }
+    public var fastModeLabel: String { isKorean ? "Fast 모드" : "Fast Mode" }
+    public var fastModeCheckbox: String { isKorean ? "빠른 서비스 티어 사용 (지원 모델만)" : "Use faster service tier (supported models only)" }
+    public var customModelOption: String { isKorean ? "직접 입력…" : "Custom…" }
     public var analysisIntervalLabel: String { isKorean ? "분석 주기" : "Analysis Interval" }
 
     /// Short label for a discrete analysis-interval step (e.g. "60분"/"2시간"). Steps

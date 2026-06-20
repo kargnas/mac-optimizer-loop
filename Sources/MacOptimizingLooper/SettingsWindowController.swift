@@ -3,8 +3,12 @@ import MacOptimizingLooperCore
 
 @MainActor
 final class SettingsWindowController: NSWindowController {
-    private let modelField = NSTextField()
+    private let providerPopup = NSPopUpButton()
+    private let modelPopup = NSPopUpButton()
+    // Free-text model entry, shown only when the model popup's "Custom…" is selected.
+    private let modelCustomField = NSTextField()
     private let thinkingPopup = NSPopUpButton()
+    private let fastModeCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let intervalSlider = NSSlider()
     private let intervalValueLabel = NSTextField(labelWithString: "")
     private let monitorSlider = NSSlider()
@@ -18,13 +22,20 @@ final class SettingsWindowController: NSWindowController {
     private let terminalPopup = NSPopUpButton()
     private let detectedLanguageField = NSTextField(labelWithString: "")
     private let effectiveLanguageField = NSTextField(labelWithString: "")
+    private let providerLabel = NSTextField(labelWithString: "")
     private let modelLabel = NSTextField(labelWithString: "")
+    private let modelCustomLabel = NSTextField(labelWithString: "")
     private let thinkingLabel = NSTextField(labelWithString: "")
+    private let fastModeLabel = NSTextField(labelWithString: "")
     private let intervalLabel = NSTextField(labelWithString: "")
     private let monitorLabel = NSTextField(labelWithString: "")
     private let languageLabel = NSTextField(labelWithString: "")
     private let terminalLabel = NSTextField(labelWithString: "")
     private let languageHelpField = NSTextField(labelWithString: "")
+    private var modelCustomRow: NSStackView?
+    // Sentinel for the "Custom…" model popup entry (no catalog slug).
+    private static let customModelSentinel = "__custom__"
+
     private lazy var saveButton: NSButton = {
         let button = NSButton(title: "", target: self, action: #selector(save(_:)))
         button.bezelStyle = .rounded
@@ -37,6 +48,7 @@ final class SettingsWindowController: NSWindowController {
         return button
     }()
     private var currentConfig = AppConfig.defaults(environment: [:])
+    private var catalog = ProviderCatalog(models: [])
     private var terminalApplications: [TerminalApplication] = []
     private let onSave: (AppConfig) -> Void
 
@@ -44,7 +56,7 @@ final class SettingsWindowController: NSWindowController {
         self.onSave = onSave
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 500, height: 394),
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 560),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -61,8 +73,11 @@ final class SettingsWindowController: NSWindowController {
 
     func configure(with config: AppConfig) {
         currentConfig = config
-        modelField.stringValue = config.model
-        thinkingPopup.selectItem(withTitle: config.thinkingLevel)
+        selectProvider(config.resolvedProviderKind)
+        reloadCatalog()
+        populateModels(selectingModel: config.model)
+        populateEfforts(selecting: config.thinkingLevel)
+        updateFastMode(checked: config.fastMode)
         setIntervalSlider(toNearestSeconds: config.intervalSeconds)
         updateIntervalValueLabel()
         setMonitorSlider(toNearestSeconds: config.monitorSeconds)
@@ -75,9 +90,23 @@ final class SettingsWindowController: NSWindowController {
     private func buildContent() {
         guard let contentView = window?.contentView else { return }
 
-        modelField.placeholderString = "sonnet"
-        thinkingPopup.removeAllItems()
-        thinkingPopup.addItems(withTitles: AppConfig.validThinkingLevels)
+        providerPopup.removeAllItems()
+        for kind in LLMProviderKind.allCases {
+            providerPopup.addItem(withTitle: kind.displayName)
+            providerPopup.lastItem?.representedObject = kind.rawValue
+        }
+        providerPopup.target = self
+        providerPopup.action = #selector(providerChanged(_:))
+
+        modelPopup.target = self
+        modelPopup.action = #selector(modelChanged(_:))
+        modelCustomField.placeholderString = "model id"
+
+        thinkingPopup.target = self
+        thinkingPopup.action = #selector(thinkingChanged(_:))
+
+        fastModeCheckbox.target = self
+        fastModeCheckbox.action = #selector(fastModeToggled(_:))
 
         // Snap-to-step slider over the 9 fixed interval values (10m … 36h).
         intervalSlider.minValue = 0
@@ -109,8 +138,13 @@ final class SettingsWindowController: NSWindowController {
         languageHelpField.lineBreakMode = .byWordWrapping
         languageHelpField.maximumNumberOfLines = 2
 
-        let modelRow = row(label: modelLabel, control: modelField)
+        let providerRow = row(label: providerLabel, control: providerPopup)
+        let modelRow = row(label: modelLabel, control: modelPopup)
+        let customRow = row(label: modelCustomLabel, control: modelCustomField)
+        modelCustomRow = customRow
+        customRow.isHidden = true
         let thinkingRow = row(label: thinkingLabel, control: thinkingPopup)
+        let fastModeRow = row(label: fastModeLabel, control: fastModeCheckbox)
         let intervalRow = sliderRow(label: intervalLabel, slider: intervalSlider, valueLabel: intervalValueLabel)
         let monitorRow = sliderRow(label: monitorLabel, slider: monitorSlider, valueLabel: monitorValueLabel)
         let languageRow = row(label: languageLabel, control: languageField)
@@ -122,8 +156,11 @@ final class SettingsWindowController: NSWindowController {
         buttonStack.distribution = .gravityAreas
 
         let stack = NSStackView(views: [
+            providerRow,
             modelRow,
+            customRow,
             thinkingRow,
+            fastModeRow,
             intervalRow,
             monitorRow,
             languageRow,
@@ -143,8 +180,10 @@ final class SettingsWindowController: NSWindowController {
             stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
-            modelField.widthAnchor.constraint(equalToConstant: 260),
-            thinkingPopup.widthAnchor.constraint(equalToConstant: 160),
+            providerPopup.widthAnchor.constraint(equalToConstant: 160),
+            modelPopup.widthAnchor.constraint(equalToConstant: 260),
+            modelCustomField.widthAnchor.constraint(equalToConstant: 260),
+            thinkingPopup.widthAnchor.constraint(equalToConstant: 200),
             intervalSlider.widthAnchor.constraint(equalToConstant: 200),
             intervalValueLabel.widthAnchor.constraint(equalToConstant: 64),
             monitorSlider.widthAnchor.constraint(equalToConstant: 200),
@@ -183,6 +222,135 @@ final class SettingsWindowController: NSWindowController {
         row.spacing = 12
         return row
     }
+
+    // MARK: - Provider / model / effort cascading
+
+    private var selectedProviderKind: LLMProviderKind {
+        let raw = providerPopup.selectedItem?.representedObject as? String ?? LLMProviderKind.claude.rawValue
+        return LLMProviderKind.resolved(raw)
+    }
+
+    private func selectProvider(_ kind: LLMProviderKind) {
+        let index = LLMProviderKind.allCases.firstIndex(of: kind) ?? 0
+        providerPopup.selectItem(at: index)
+    }
+
+    private func reloadCatalog() {
+        catalog = ProviderRegistry.catalog(kind: selectedProviderKind).load()
+    }
+
+    /// Rebuilds the model popup from the current catalog, always ending with a
+    /// "Custom…" escape. Selects `slug` if the catalog has it, otherwise Custom.
+    private func populateModels(selectingModel slug: String) {
+        let text = AppStrings(languageIdentifier: currentConfig.resolvedOutputLanguageIdentifier())
+        modelPopup.removeAllItems()
+        for model in catalog.models {
+            modelPopup.addItem(withTitle: model.displayName)
+            modelPopup.lastItem?.representedObject = model.slug
+        }
+        modelPopup.addItem(withTitle: text.customModelOption)
+        modelPopup.lastItem?.representedObject = Self.customModelSentinel
+
+        let trimmed = slug.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let index = catalog.models.firstIndex(where: { $0.slug == trimmed }) {
+            modelPopup.selectItem(at: index)
+            modelCustomField.stringValue = ""
+        } else {
+            modelPopup.selectItem(at: modelPopup.numberOfItems - 1)   // Custom…
+            modelCustomField.stringValue = trimmed
+        }
+        updateCustomFieldVisibility()
+    }
+
+    private var isCustomModelSelected: Bool {
+        (modelPopup.selectedItem?.representedObject as? String) == Self.customModelSentinel
+    }
+
+    private var selectedCatalogModel: ProviderModel? {
+        guard let slug = modelPopup.selectedItem?.representedObject as? String,
+              slug != Self.customModelSentinel else { return nil }
+        return catalog.model(slug: slug)
+    }
+
+    private func updateCustomFieldVisibility() {
+        modelCustomRow?.isHidden = !isCustomModelSelected
+    }
+
+    /// Fills the effort popup from the selected model's reasoning levels (or a provider
+    /// fallback for a custom model), selecting `level` if present, else the model default.
+    private func populateEfforts(selecting level: String) {
+        let efforts: [ProviderEffort]
+        let defaultLevel: String
+        if let model = selectedCatalogModel {
+            efforts = model.efforts
+            defaultLevel = model.defaultEffort
+        } else {
+            efforts = fallbackEfforts()
+            defaultLevel = efforts.first?.level ?? ""
+        }
+
+        thinkingPopup.removeAllItems()
+        for effort in efforts {
+            thinkingPopup.addItem(withTitle: effort.level)
+            thinkingPopup.lastItem?.representedObject = effort.level
+            if !effort.description.isEmpty {
+                thinkingPopup.lastItem?.toolTip = effort.description
+            }
+        }
+        thinkingPopup.isEnabled = !efforts.isEmpty
+
+        let wanted = level.trimmingCharacters(in: .whitespacesAndNewlines)
+        if efforts.contains(where: { $0.level == wanted }) {
+            thinkingPopup.selectItem(withTitle: wanted)
+        } else if !defaultLevel.isEmpty {
+            thinkingPopup.selectItem(withTitle: defaultLevel)
+        }
+    }
+
+    /// Effort levels offered for a custom (off-catalog) model: the union of every
+    /// catalog model's levels, falling back to the claude set if the catalog is empty.
+    private func fallbackEfforts() -> [ProviderEffort] {
+        var seen = Set<String>()
+        var union: [ProviderEffort] = []
+        for model in catalog.models {
+            for effort in model.efforts where seen.insert(effort.level).inserted {
+                union.append(effort)
+            }
+        }
+        if union.isEmpty {
+            return AppConfig.validThinkingLevels.map { ProviderEffort(level: $0, description: "") }
+        }
+        return union
+    }
+
+    /// Enables Fast Mode only when the selected catalog model supports it; a custom or
+    /// non-supporting model leaves it disabled and unchecked (no toggle we cannot honor).
+    private func updateFastMode(checked: Bool) {
+        let supports = selectedCatalogModel?.supportsFastMode ?? false
+        fastModeCheckbox.isEnabled = supports
+        fastModeCheckbox.state = (supports && checked) ? .on : .off
+    }
+
+    @objc private func providerChanged(_ sender: NSPopUpButton) {
+        // Preserve a custom-typed model across the switch; otherwise default to the new
+        // provider's first catalog model (not an empty "Custom…").
+        let keepCustom = isCustomModelSelected ? modelCustomField.stringValue : nil
+        reloadCatalog()
+        let preferredModel = keepCustom ?? (catalog.models.first?.slug ?? "")
+        populateModels(selectingModel: preferredModel)
+        populateEfforts(selecting: thinkingPopup.titleOfSelectedItem ?? "")
+        updateFastMode(checked: fastModeCheckbox.state == .on)
+    }
+
+    @objc private func modelChanged(_ sender: NSPopUpButton) {
+        updateCustomFieldVisibility()
+        populateEfforts(selecting: thinkingPopup.titleOfSelectedItem ?? "")
+        updateFastMode(checked: fastModeCheckbox.state == .on)
+    }
+
+    @objc private func thinkingChanged(_ sender: NSPopUpButton) {}
+
+    @objc private func fastModeToggled(_ sender: NSButton) {}
 
     @objc private func intervalChanged(_ sender: NSSlider) {
         updateIntervalValueLabel()
@@ -231,8 +399,12 @@ final class SettingsWindowController: NSWindowController {
     private func applyLocalizedText() {
         let text = AppStrings(languageIdentifier: currentConfig.resolvedOutputLanguageIdentifier())
         window?.title = text.settingsWindowTitle
-        modelLabel.stringValue = text.claudeModelLabel
+        providerLabel.stringValue = text.providerLabel
+        modelLabel.stringValue = text.modelLabel
+        modelCustomLabel.stringValue = text.customModelOption
         thinkingLabel.stringValue = text.thinkingLevelLabel
+        fastModeLabel.stringValue = text.fastModeLabel
+        fastModeCheckbox.title = text.fastModeCheckbox
         intervalLabel.stringValue = text.analysisIntervalLabel
         updateIntervalValueLabel()
         monitorLabel.stringValue = text.monitorDurationLabel
@@ -252,12 +424,22 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func save(_ sender: NSButton) {
         let interval = selectedIntervalSeconds()
-        let model = modelField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         let languageIdentifier = AppConfig.normalizedLanguageIdentifier(languageField.stringValue)
 
+        // Resolve the chosen model: a catalog slug, or the trimmed custom field.
+        let chosenModel: String
+        if isCustomModelSelected {
+            chosenModel = modelCustomField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            chosenModel = (modelPopup.selectedItem?.representedObject as? String) ?? ""
+        }
+
         var newConfig = currentConfig
-        newConfig.model = model.isEmpty ? AppConfig.defaults(environment: [:]).model : model
+        newConfig.provider = selectedProviderKind.rawValue
+        newConfig.model = chosenModel.isEmpty ? AppConfig.defaults(environment: [:]).model : chosenModel
         newConfig.thinkingLevel = thinkingPopup.titleOfSelectedItem ?? currentConfig.thinkingLevel
+        // Only persist Fast Mode when the control is actually enabled (model supports it).
+        newConfig.fastMode = fastModeCheckbox.isEnabled && fastModeCheckbox.state == .on
         newConfig.monitorSeconds = selectedMonitorSeconds()
         newConfig.intervalSeconds = interval
         newConfig.outputLanguageIdentifier = languageIdentifier

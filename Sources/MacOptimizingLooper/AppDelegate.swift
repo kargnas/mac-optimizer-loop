@@ -154,7 +154,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                 } catch {
                     optimizerReport = MacOptimizerReport(scriptPath: "mac-optimizer", output: "\(text.macOptimizerFailedPrefix): \(error)")
                 }
-                let provider = LLMAdviceProvider(client: ClaudeCLIClient(effort: config.thinkingLevel), config: config)
+                let providerKind = config.resolvedProviderKind
+                let client = ProviderRegistry.makeClient(kind: providerKind)
+                let provider = LLMAdviceProvider(
+                    client: client,
+                    config: config,
+                    supportsStructuredOutput: providerKind.supportsStructuredOutput
+                )
                 let snapshot = try collector.collect()
                 let advice = try await provider.advise(for: snapshot, optimizerReport: optimizerReport)
                 return (snapshot, advice)
@@ -472,7 +478,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             terminalItem.representedObject = command
             submenu.addItem(terminalItem)
 
-            let reviewItem = NSMenuItem(title: text.reviewWithClaude, action: #selector(reviewSuggestionWithClaude(_:)), keyEquivalent: "")
+            let reviewItem = NSMenuItem(title: text.reviewWith(provider: config.resolvedProviderKind.displayName), action: #selector(reviewSuggestionWithClaude(_:)), keyEquivalent: "")
             reviewItem.target = self
             reviewItem.representedObject = SuggestionMenuPayload(suggestion: suggestion)
             submenu.addItem(reviewItem)
@@ -483,7 +489,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             submenu.addItem(copyItem)
         } else {
             submenu.addItem(.separator())
-            let reviewItem = NSMenuItem(title: text.reviewWithClaude, action: #selector(reviewSuggestionWithClaude(_:)), keyEquivalent: "")
+            let reviewItem = NSMenuItem(title: text.reviewWith(provider: config.resolvedProviderKind.displayName), action: #selector(reviewSuggestionWithClaude(_:)), keyEquivalent: "")
             reviewItem.target = self
             reviewItem.representedObject = SuggestionMenuPayload(suggestion: suggestion)
             submenu.addItem(reviewItem)
@@ -557,7 +563,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
     @objc private func reviewSuggestionWithClaude(_ sender: NSMenuItem) {
         guard let payload = sender.representedObject as? SuggestionMenuPayload else { return }
-        guard let claudeURL = ClaudeCLIClient.defaultExecutableURL() else {
+        let providerKind = config.resolvedProviderKind
+        // Resolve the selected provider's CLI; without it there is no review session.
+        let executableURL = providerKind == .codex
+            ? CodexCLIClient.defaultExecutableURL()
+            : ClaudeCLIClient.defaultExecutableURL()
+        guard let executableURL else {
             showAlert(title: strings.missingClaudeCLITitle, message: strings.missingClaudeCLIMessage)
             return
         }
@@ -568,14 +579,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                 outputLanguageIdentifier: config.resolvedOutputLanguageIdentifier()
             )
             let promptURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("mac-optimizing-looper-claude-review-\(UUID().uuidString).txt")
+                .appendingPathComponent("mac-optimizing-looper-review-\(UUID().uuidString).txt")
             try prompt.write(to: promptURL, atomically: true, encoding: .utf8)
-            let script = TerminalScriptBuilder.claudeReviewScript(
-                promptFilePath: promptURL.path,
-                claudeExecutablePath: claudeURL.path,
-                model: config.model,
-                languageIdentifier: config.resolvedOutputLanguageIdentifier()
-            )
+            let script: String
+            switch providerKind {
+            case .codex:
+                script = TerminalScriptBuilder.codexReviewScript(
+                    promptFilePath: promptURL.path,
+                    codexExecutablePath: executableURL.path,
+                    model: config.model,
+                    effort: config.thinkingLevel,
+                    fastMode: config.fastMode,
+                    languageIdentifier: config.resolvedOutputLanguageIdentifier()
+                )
+            case .claude:
+                script = TerminalScriptBuilder.claudeReviewScript(
+                    promptFilePath: promptURL.path,
+                    claudeExecutablePath: executableURL.path,
+                    model: config.model,
+                    languageIdentifier: config.resolvedOutputLanguageIdentifier()
+                )
+            }
             do {
                 try openTerminal(script: script)
             } catch {
@@ -623,7 +647,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // 1. LLM risk check. Any CLI failure maps to .unknown → still confirm.
         let verdict: CommandRiskVerdict
         do {
-            verdict = try await riskAssessor.assess(command: command, model: config.model, languageIdentifier: language)
+            verdict = try await riskAssessor.assess(
+                command: command,
+                provider: config.resolvedProviderKind,
+                model: config.model,
+                effort: config.thinkingLevel,
+                fastMode: config.fastMode,
+                languageIdentifier: language
+            )
         } catch {
             verdict = CommandRiskVerdict(level: .unknown, reason: strings.safetyCheckUnavailable)
         }
@@ -797,6 +828,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             switch llmError {
             case .missingClaudeCLI:
                 return text.missingClaudeCLITitle
+            case .missingProviderCLI(let provider):
+                return text.isKorean ? "\(provider) CLI를 찾을 수 없음" : "\(provider) CLI not found"
             case .processFailed(let status, let message):
                 return text.processFailed(status: status, message: message)
             case .invalidResponse:

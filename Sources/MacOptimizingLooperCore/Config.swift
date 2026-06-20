@@ -6,9 +6,16 @@ public enum ConfigError: Error, Equatable {
 }
 
 public struct AppConfig: Equatable {
+    /// LLM backend CLI: "claude" or "codex". Defaults to claude; an absent/unknown
+    /// value resolves to claude so older configs keep working unchanged.
+    public var provider: String
     public var model: String
-    /// Claude `--effort` level for the analysis pass: low/medium/high/xhigh/max.
+    /// Reasoning level for the analysis pass. Provider-relative: claude `--effort`
+    /// (low/medium/high/xhigh/max), codex `model_reasoning_effort` (low/medium/high/xhigh).
     public var thinkingLevel: String
+    /// Requests the provider's faster service tier when the selected model supports it
+    /// (codex "Fast"/priority tier). Ignored by providers without a fast tier (claude).
+    public var fastMode: Bool
     /// Seconds the mac-optimizer sustained monitor samples before evaluating. 0 disables it.
     public var monitorSeconds: Int
     public var intervalSeconds: Int
@@ -21,8 +28,10 @@ public struct AppConfig: Equatable {
     public static let validThinkingLevels = ["low", "medium", "high", "xhigh", "max"]
 
     public init(
+        provider: String = "claude",
         model: String,
         thinkingLevel: String = "max",
+        fastMode: Bool = false,
         monitorSeconds: Int = 30,
         intervalSeconds: Int,
         outputLanguageIdentifier: String? = nil,
@@ -30,8 +39,10 @@ public struct AppConfig: Equatable {
         maxTokens: Int,
         temperature: Double
     ) {
+        self.provider = provider
         self.model = model
         self.thinkingLevel = thinkingLevel
+        self.fastMode = fastMode
         self.monitorSeconds = monitorSeconds
         self.intervalSeconds = intervalSeconds
         self.outputLanguageIdentifier = outputLanguageIdentifier
@@ -42,8 +53,10 @@ public struct AppConfig: Equatable {
 
     public static func defaults(environment: [String: String]) -> AppConfig {
         var config = AppConfig(
+            provider: "claude",
             model: "sonnet",
             thinkingLevel: "max",
+            fastMode: false,
             monitorSeconds: 30,
             intervalSeconds: 3_600,
             outputLanguageIdentifier: nil,
@@ -70,11 +83,17 @@ public struct AppConfig: Equatable {
             throw ConfigError.malformedFile
         }
 
+        if let provider = fileConfig.provider {
+            config.provider = normalizedProvider(provider)
+        }
         if let model = fileConfig.model {
             config.model = model
         }
         if let thinkingLevel = fileConfig.thinkingLevel {
             config.thinkingLevel = normalizedThinkingLevel(thinkingLevel)
+        }
+        if let fastMode = fileConfig.fastMode {
+            config.fastMode = fastMode
         }
         if let monitorSeconds = fileConfig.monitorSeconds {
             config.monitorSeconds = normalizedMonitorSeconds(monitorSeconds)
@@ -127,8 +146,10 @@ public struct AppConfig: Equatable {
         let directory = configURL.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let data = try JSONEncoder.prettySorted.encode(FileConfig(
+            provider: provider,
             model: model,
             thinkingLevel: thinkingLevel,
+            fastMode: fastMode,
             monitorSeconds: monitorSeconds,
             intervalSeconds: intervalSeconds,
             outputLanguageIdentifier: outputLanguageIdentifier,
@@ -167,6 +188,16 @@ public struct AppConfig: Equatable {
         return validThinkingLevels.contains(trimmed) ? trimmed : "max"
     }
 
+    /// Resolves a provider string to a known backend's rawValue, defaulting to claude.
+    public static func normalizedProvider(_ value: String) -> String {
+        LLMProviderKind.resolved(value).rawValue
+    }
+
+    /// The resolved provider backend for this config.
+    public var resolvedProviderKind: LLMProviderKind {
+        LLMProviderKind.resolved(provider)
+    }
+
     /// Clamps the sustained-monitor duration to a sane range (0–600s; 0 disables it).
     public static func normalizedMonitorSeconds(_ value: Int) -> Int {
         max(0, min(600, value))
@@ -180,8 +211,10 @@ public struct AppConfig: Equatable {
 }
 
 private struct FileConfig: Codable {
+    let provider: String?
     let model: String?
     let thinkingLevel: String?
+    let fastMode: Bool?
     let monitorSeconds: Int?
     let intervalSeconds: Int?
     let outputLanguageIdentifier: String?
