@@ -4,6 +4,7 @@
 # Inert until these repo secrets exist (see docs/release-setup.md):
 #   BUILD_CERTIFICATE_BASE64, P12_PASSWORD, KEYCHAIN_PASSWORD,
 #   APPLE_ID, APPLE_APP_PASSWORD, APPLE_TEAM_ID, TAP_SSH_KEY
+#   SPARKLE_PRIVATE_KEY (already set — EdDSA key for signing the appcast)
 name: Build and Release
 
 on:
@@ -92,6 +93,7 @@ jobs:
           APP_VERSION: ${{ env.APP_VERSION }}
           HARDENED_RUNTIME: '1'
           CODE_SIGN_IDENTITY: 'Developer ID Application'
+          SPARKLE_AUTO: '1'   # release builds get background auto-update enabled
         run: ./script/build-app.zsh
 
       - name: Notarize app
@@ -133,6 +135,43 @@ jobs:
             --wait --timeout 30m
           xcrun stapler staple "$DMG_NAME"
 
+      - name: Sparkle sign + appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          # Fetch the Sparkle CLI tools (sign_update) matching the embedded framework.
+          curl -fsSL -o sparkle.tar.xz \
+            https://github.com/sparkle-project/Sparkle/releases/download/2.8.1/Sparkle-2.8.1.tar.xz
+          mkdir -p sparkle && tar -xf sparkle.tar.xz -C sparkle
+          chmod +x sparkle/bin/sign_update
+
+          # EdDSA-sign the notarized DMG. sign_update prints:
+          #   sparkle:edSignature="..." length="..."
+          printf '%s\n' "$SPARKLE_PRIVATE_KEY" > sparkle_ed_key
+          SIG_LINE="$(sparkle/bin/sign_update "$DMG_NAME" --ed-key-file sparkle_ed_key)"
+          rm -f sparkle_ed_key
+
+          DL_URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}/${DMG_NAME}"
+          # sparkle:version compares against the installed CFBundleVersion (= APP_VERSION),
+          # so it must be the bare, monotonically increasing version (no leading "v").
+          cat > appcast.xml <<XML
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+            <channel>
+              <title>Mac Optimizing Looper</title>
+              <link>https://github.com/${{ github.repository }}/releases/latest/download/appcast.xml</link>
+              <item>
+                <title>${APP_VERSION}</title>
+                <sparkle:version>${APP_VERSION}</sparkle:version>
+                <sparkle:shortVersionString>${APP_VERSION}</sparkle:shortVersionString>
+                <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+                <pubDate>$(date -R)</pubDate>
+                <enclosure url="${DL_URL}" type="application/octet-stream" ${SIG_LINE}/>
+              </item>
+            </channel>
+          </rss>
+          XML
+
       - name: Cleanup keychain
         if: always()
         run: security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
@@ -141,7 +180,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          files: MacOptimizingLooper-*.dmg
+          # appcast.xml ships in every release; SUFeedURL points at the `latest`
+          # release alias so Sparkle always fetches the newest one.
+          files: |
+            MacOptimizingLooper-*.dmg
+            appcast.xml
           generate_release_notes: true
 
   # Create or bump the Homebrew cask in kargnas/homebrew-tap so

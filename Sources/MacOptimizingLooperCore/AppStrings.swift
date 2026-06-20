@@ -12,13 +12,14 @@ public struct AppStrings {
     }
 
     public var appAccessibilityDescription: String { isKorean ? "부하 어드바이저" : "Load Advisor" }
-    public var appTooltip: String { isKorean ? "Mac 부하 어드바이저" : "Mac Optimizing Looper" }
+    public var appTooltip: String { isKorean ? "Mac Optimizing Looper" : "Mac Optimizing Looper" }
     public var analysisWaiting: String { isKorean ? "분석 대기 중" : "Waiting for analysis" }
     public var configurationWarningTitle: String { isKorean ? "⚠️ 설정 파일 오류 — 기본값으로 실행 중" : "⚠️ Config file error — running with defaults" }
     public var analyzing: String { isKorean ? "분석 중…" : "Analyzing..." }
     public var noSuggestions: String { isKorean ? "아직 제안이 없습니다" : "No suggestions yet" }
     public var analyzeNow: String { isKorean ? "지금 분석" : "Analyze Now" }
     public var settingsMenuItem: String { isKorean ? "설정…" : "Settings..." }
+    public var checkForUpdatesMenuItem: String { isKorean ? "업데이트 확인…" : "Check for Updates..." }
     public var quit: String { isKorean ? "종료" : "Quit" }
     public var openCommandInTerminal: String { isKorean ? "터미널에 명령어 띄우기" : "Show Command in Terminal" }
     public var reviewWithClaude: String { isKorean ? "Claude로 검토" : "Review with Claude" }

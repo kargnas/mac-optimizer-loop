@@ -1,9 +1,13 @@
 import AppKit
 import MacOptimizingLooperCore
+import Sparkle
 import UserNotifications
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
+    // Strong ref kept for the whole app lifetime; releasing it stops update checks.
+    // nil when running the bare SwiftPM binary (no .app bundle) — see startUpdaterIfBundled().
+    private var updaterController: SPUStandardUpdaterController?
     private var statusItem: NSStatusItem?
     private let menu = NSMenu()
     private let headerItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
@@ -81,6 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let configurationWarningTitle {
             headerItem.title = configurationWarningTitle
         }
+        startUpdaterIfBundled()
         updateStatusBarButton()
         rebuildMenu()
         startClockTimer()
@@ -434,6 +439,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: text.analyzeNow, action: #selector(analyzeNow(_:)), keyEquivalent: "r"))
         menu.addItem(NSMenuItem(title: text.settingsMenuItem, action: #selector(showSettings(_:)), keyEquivalent: ","))
+        // Only when running from a bundled .app — the bare dev binary has no updater.
+        if updaterController != nil {
+            menu.addItem(NSMenuItem(title: text.checkForUpdatesMenuItem, action: #selector(checkForUpdates(_:)), keyEquivalent: ""))
+        }
         menu.addItem(NSMenuItem(title: text.quit, action: #selector(quit(_:)), keyEquivalent: "q"))
 
         for item in menu.items where item.action != nil {
@@ -739,6 +748,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
     }
 
+    // MARK: - Software update (Sparkle)
+
+    private func startUpdaterIfBundled() {
+        // Sparkle errors out unless it runs from a real .app bundle; the dev loop
+        // (`swift run`) executes the bare binary, so skip there. Manual "Check for
+        // Updates…" is hidden in that case (rebuildMenu gates on updaterController).
+        guard Bundle.main.bundlePath.hasSuffix(".app") else { return }
+        updaterController = SPUStandardUpdaterController(
+            startingUpdater: true,
+            updaterDelegate: self,
+            userDriverDelegate: nil
+        )
+    }
+
+    @objc private func checkForUpdates(_ sender: NSMenuItem) {
+        // Accessory (LSUIElement) app: without activating first, Sparkle's update
+        // window opens behind other apps and looks like nothing happened.
+        NSApp.activate(ignoringOtherApps: true)
+        updaterController?.checkForUpdates(sender)
+    }
+
     // All terminal-opening features funnel through the shared TerminalLauncher so
     // app resolution and per-terminal launch quirks live in one place.
     private func openTerminal(script: String) throws {
@@ -780,7 +810,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private static func shouldShowSettingsOnLaunch() -> Bool {
         CommandLine.arguments.contains("--show-settings")
-            || ProcessInfo.processInfo.environment["MAC_LOAD_ADVISOR_SHOW_SETTINGS"] == "1"
+            || ProcessInfo.processInfo.environment["MAC_OPTIMIZING_LOOPER_SHOW_SETTINGS"] == "1"
     }
 }
 

@@ -85,7 +85,7 @@ public struct ShellResponseFormatterProvider: ResponseFormatting {
 
     private static func scriptCandidates(environment: [String: String]) -> [URL] {
         var paths: [String] = []
-        if let configured = environment["MAC_LOAD_ADVISOR_FORMAT_JSON"], !configured.isEmpty {
+        if let configured = environment["MAC_OPTIMIZING_LOOPER_FORMAT_JSON"], !configured.isEmpty {
             paths.append(configured)
         }
         if let resourceURL = Bundle.main.resourceURL?.appendingPathComponent("mac-optimizing-looper-format-json.sh") {
