@@ -10,7 +10,7 @@ Dock 아이콘 없는 macOS 메뉴바 앱. 로컬 LLM CLI 위에서 **관찰 →
 
 **언어:** UI를 10개 언어로 완전히 현지화했음(English, 한국어, 简体中文, 繁體中文, 日本語, Español, Deutsch, Français, Português do Brasil, Русский). 설정의 **Language** 피커가 UI 언어와 분석 출력 언어를 함께 정함. "System default"는 macOS 언어를 따라감.
 
-<p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper 설정 — 프로바이더·모델·언어·주기" width="520"></p>
+<p align="center"><img src="docs/settings-ko.png" alt="Mac Optimizing Looper 설정 — 프로바이더·모델·언어·주기" width="520"></p>
 
 ## 루프 한 사이클
 
@@ -23,7 +23,7 @@ Dock 아이콘 없는 macOS 메뉴바 앱. 로컬 LLM CLI 위에서 **관찰 →
 
 메뉴바에 개수가 뜨고, 드롭다운은 심각도 높은 순으로 정렬됨(🔴 위급 → 🟡 경고 → 🟢 위생). 각 행은 Copy / Show in Terminal / Review with Claude / Run Command Now로 펼쳐짐:
 
-<p align="center"><img src="docs/menu.png" alt="mac-optimizing-looper 메뉴 — 심각도 색상별 정렬 제안" width="520"></p>
+<p align="center"><img src="docs/menu-ko.png" alt="mac-optimizing-looper 메뉴 — 심각도 색상별 정렬 제안" width="520"></p>
 
 ## 해결 실행 — 게이트가 걸린 경로
 
