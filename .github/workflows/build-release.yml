@@ -46,7 +46,9 @@ jobs:
   release:
     needs: preflight
     if: needs.preflight.outputs.ready == 'true'
-    runs-on: macos-14
+    # Match ci.yml's runner: the app's strict-concurrency code compiles on the
+    # macos-latest (Swift 6) toolchain but not the older macos-14 (Swift 5.10) one.
+    runs-on: macos-latest
     outputs:
       version: ${{ steps.resolve.outputs.version }}
     steps:
