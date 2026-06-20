@@ -6,6 +6,10 @@ A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask the
 
 **Providers:** the default backend is the `claude` CLI; the `codex` CLI is also supported. Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read live from each CLI. With codex, the analysis is a single schema-constrained pass (no separate format pass).
 
+**Languages:** the UI is fully localized in 10 languages (English, 한국어, 简体中文, 繁體中文, 日本語, Español, Deutsch, Français, Português do Brasil, Русский). The Settings **Language** picker drives both the UI and the analysis output language; "System default" follows your macOS language.
+
+<p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper Settings — provider, model, language, interval" width="520"></p>
+
 ## The loop, one cycle
 
 ```

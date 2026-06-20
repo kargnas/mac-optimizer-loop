@@ -6,6 +6,10 @@ Dock 아이콘 없는 macOS 메뉴바 앱. 로컬 LLM CLI 위에서 **관찰 →
 
 **프로바이더:** 기본 백엔드는 `claude` CLI이며 `codex` CLI도 지원함. 설정에서 **프로바이더 / 모델 / 속도 / Fast Mode**를 고름 — 모델과 추론 강도는 각 CLI에서 실시간으로 읽어옴. codex는 분석이 스키마 기반 단일 패스임(별도 포맷 패스 없음).
 
+**언어:** UI를 10개 언어로 완전히 현지화했음(English, 한국어, 简体中文, 繁體中文, 日本語, Español, Deutsch, Français, Português do Brasil, Русский). 설정의 **Language** 피커가 UI 언어와 분석 출력 언어를 함께 정함. "System default"는 macOS 언어를 따라감.
+
+<p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper 설정 — 프로바이더·모델·언어·주기" width="520"></p>
+
 ## 루프 한 사이클
 
 ```
