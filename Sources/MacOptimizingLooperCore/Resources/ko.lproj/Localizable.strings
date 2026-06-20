@@ -1,0 +1,109 @@
+/* Mac Optimizing Looper — 한국어. en.lproj/Localizable.strings 가 정본.
+   "%@" 자리표시자는 AppStrings.swift 호출부 순서와 일치해야 함. */
+
+/* 메뉴바 + 상태 */
+"app.accessibility" = "부하 어드바이저";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "분석 대기 중";
+"config.warning.title" = "⚠️ 설정 파일 오류 — 기본값으로 실행 중";
+"analyzing" = "분석 중…";
+"analyzingElapsed" = "분석 중… %@";
+"suggestions.none" = "아직 제안이 없습니다";
+"lastChecked.label" = "마지막 확인";
+"mem.short" = "메모리";
+
+/* 메뉴 동작 */
+"analyze.now" = "지금 분석";
+"menu.settings" = "설정…";
+"menu.checkForUpdates" = "업데이트 확인…";
+"menu.quit" = "종료";
+
+/* 제안 행 동작 */
+"action.showInTerminal" = "터미널에서 명령어 보기";
+"action.reviewWithClaude" = "Claude로 검토하기";
+"action.reviewWith" = "%@로 검토하기";
+"action.copyCommand" = "명령어 복사";
+"action.runNow" = "명령어 바로 실행";
+"action.runDone" = "실행 완료 · 다시 실행";
+"action.run" = "실행";
+"reason.label" = "이유";
+
+/* 안전 검사 / 실행 게이트 */
+"dangerous.title" = "위험할 수 있는 명령어";
+"dangerous.prompt.lead" = "이 명령어를 실행할까요?";
+"dangerous.prompt.reasonPrefix" = "사유: %@";
+"safety.checking" = "명령어 위험성 검사 중…";
+"safety.unavailable" = "위험성 검사를 실행하지 못했습니다(claude CLI를 확인하세요). 안전을 위해 실행 전 확인이 필요합니다.";
+"command.running" = "명령어 실행 중…";
+
+/* 실행 결과 */
+"result.windowTitle" = "실행 결과";
+"result.clickToView" = "클릭하면 출력을 볼 수 있습니다";
+"result.noOutput" = "(출력 없음)";
+"result.exitCodeLabel" = "종료 코드";
+"result.ranWithAdmin" = "관리자 권한으로 실행했습니다";
+
+/* 터미널 */
+"terminal.openFailed" = "터미널 열기 실패";
+"terminal.appNotFound" = "설정한 터미널 앱을 찾을 수 없습니다: %@. 설정에서 터미널을 다시 선택하세요.";
+"terminal.appNotFound.none" = "(없음)";
+"terminal.commandHeader" = "Mac Optimizing Looper가 제안한 명령어입니다(실행되지 않았습니다):";
+"terminal.commandFooter" = "실행하기 전에 먼저 검토하세요. 원하실 때만 직접 붙여넣어 실행하세요.";
+
+/* Claude 검토 / CLI 오류 */
+"claude.missing.title" = "Claude CLI를 찾을 수 없음";
+"claude.missing.message" = "claude 실행 파일을 찾지 못했습니다.";
+"claude.reviewOpenFailed" = "Claude 검토 열기 실패";
+"claude.reviewStarting" = "Claude가 Mac Optimizing Looper 제안을 검토하고 있습니다…";
+"claude.notExecutable" = "설정한 경로에서 Claude CLI를 실행할 수 없습니다.";
+"claude.reviewPromptMissing" = "검토 프롬프트 파일이 없습니다.";
+
+/* LLM 오류 표면 */
+"error.providerCLINotFound" = "%@ CLI를 찾을 수 없음";
+"error.invalidResponseFormat" = "잘못된 응답 형식";
+"error.decodingError" = "디코딩 오류: %@";
+"macOptimizer.failedPrefix" = "mac-optimizer 실패";
+"analysisFailed" = "분석 실패: %@";
+"process.failed" = "프로세스 실패 %@%@";
+
+/* 설정 창 */
+"settings.windowTitle" = "Mac Optimizing Looper 설정";
+"settings.providerLabel" = "프로바이더";
+"settings.modelLabel" = "모델";
+"settings.thinkingLevelLabel" = "추론 강도";
+"settings.fastModeLabel" = "Fast 모드";
+"settings.fastModeCheckbox" = "빠른 서비스 등급 사용 (지원 모델만)";
+"settings.customModelOption" = "직접 입력…";
+"settings.analysisIntervalLabel" = "분석 주기";
+"settings.monitorDurationLabel" = "모니터링 시간";
+"settings.terminalAppLabel" = "터미널 앱";
+"settings.noTerminalAppsDetected" = "감지된 터미널 앱 없음";
+"settings.languageLabel" = "언어";
+"settings.language.systemDefault" = "시스템 기본값";
+"save" = "저장";
+"cancel" = "취소";
+"ok" = "확인";
+"settings.savedRefreshing" = "설정 저장됨 · 분석 갱신 중";
+"settings.saveFailed" = "설정 저장 실패";
+
+/* 설정 — 언어 안내 라벨 */
+"detectedMacOSLanguages" = "감지된 macOS 언어: %@";
+"currentAnalysisLanguage" = "현재 분석 언어: %@";
+
+/* 슬라이더 값 라벨 (%@ = 정수 문자열) */
+"interval.minutes" = "%@분";
+"interval.hours" = "%@시간";
+"monitor.off" = "끄기";
+"monitor.seconds" = "%@초";
+
+/* 상대 시간 "X 전" (%@ = 정수 문자열) */
+"time.justNow" = "방금";
+"time.secondsAgo" = "%@초 전";
+"time.minutesAgo" = "%@분 전";
+"time.hoursAgo" = "%@시간 전";
+"time.daysAgo" = "%@일 전";
+
+/* 분석 경과 시간 (%@ = 정수 문자열) */
+"elapsed.seconds" = "%@초";
+"elapsed.minutesSeconds" = "%@분 %@초";
+"elapsed.hoursMinutes" = "%@시간 %@분";

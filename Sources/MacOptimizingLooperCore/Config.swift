@@ -27,6 +27,33 @@ public struct AppConfig: Equatable {
 
     public static let validThinkingLevels = ["low", "medium", "high", "xhigh", "max"]
 
+    /// One selectable UI/analysis language: a BCP-47 identifier matching a shipped
+    /// `<id>.lproj`, plus the language's own autonym for the Settings popup.
+    public struct SupportedLanguage: Equatable, Sendable {
+        public let identifier: String
+        public let autonym: String
+        public init(identifier: String, autonym: String) {
+            self.identifier = identifier
+            self.autonym = autonym
+        }
+    }
+
+    /// Languages offered in the Settings "Language" popup. Each identifier MUST have a
+    /// matching `Sources/MacOptimizingLooperCore/Resources/<id>.lproj`. Autonyms are the
+    /// language's own name so a user always recognizes their language in the list.
+    public static let supportedUILanguages: [SupportedLanguage] = [
+        SupportedLanguage(identifier: "en", autonym: "English"),
+        SupportedLanguage(identifier: "ko", autonym: "한국어"),
+        SupportedLanguage(identifier: "zh-Hans", autonym: "简体中文"),
+        SupportedLanguage(identifier: "zh-Hant", autonym: "繁體中文"),
+        SupportedLanguage(identifier: "ja", autonym: "日本語"),
+        SupportedLanguage(identifier: "es", autonym: "Español"),
+        SupportedLanguage(identifier: "de", autonym: "Deutsch"),
+        SupportedLanguage(identifier: "fr", autonym: "Français"),
+        SupportedLanguage(identifier: "pt-BR", autonym: "Português (Brasil)"),
+        SupportedLanguage(identifier: "ru", autonym: "Русский")
+    ]
+
     public init(
         provider: String = "claude",
         model: String,

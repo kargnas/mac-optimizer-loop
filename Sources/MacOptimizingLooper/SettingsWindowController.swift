@@ -13,7 +13,10 @@ final class SettingsWindowController: NSWindowController {
     private let intervalValueLabel = NSTextField(labelWithString: "")
     private let monitorSlider = NSSlider()
     private let monitorValueLabel = NSTextField(labelWithString: "")
-    private let languageField = NSTextField()
+    // Unified UI + analysis language. First item = "System default" (nil identifier).
+    private let languagePopup = NSPopUpButton()
+    // Sentinel representedObject for the "System default" popup entry (no override).
+    private static let systemLanguageSentinel = ""
 
     // Discrete analysis-interval steps the slider snaps to (seconds).
     private static let intervalStepsSeconds = [600, 1_800, 3_600, 7_200, 14_400, 28_800, 57_600, 86_400, 129_600]
@@ -31,7 +34,6 @@ final class SettingsWindowController: NSWindowController {
     private let monitorLabel = NSTextField(labelWithString: "")
     private let languageLabel = NSTextField(labelWithString: "")
     private let terminalLabel = NSTextField(labelWithString: "")
-    private let languageHelpField = NSTextField(labelWithString: "")
     private var modelCustomRow: NSStackView?
     // Sentinel for the "Custom…" model popup entry (no catalog slug).
     private static let customModelSentinel = "__custom__"
@@ -82,7 +84,7 @@ final class SettingsWindowController: NSWindowController {
         updateIntervalValueLabel()
         setMonitorSlider(toNearestSeconds: config.monitorSeconds)
         updateMonitorValueLabel()
-        languageField.stringValue = config.outputLanguageIdentifier ?? ""
+        selectLanguage(identifier: config.outputLanguageIdentifier)
         reloadTerminalPopup(selecting: config.terminalAppBundleIdentifier)
         applyLocalizedText()
     }
@@ -134,9 +136,19 @@ final class SettingsWindowController: NSWindowController {
         effectiveLanguageField.textColor = .secondaryLabelColor
         effectiveLanguageField.lineBreakMode = .byWordWrapping
         effectiveLanguageField.maximumNumberOfLines = 2
-        languageHelpField.textColor = .secondaryLabelColor
-        languageHelpField.lineBreakMode = .byWordWrapping
-        languageHelpField.maximumNumberOfLines = 2
+
+        // Build the language popup once: "System default" (nil override) then every
+        // shipped language by its own autonym. Localized titles are refreshed in
+        // applyLocalizedText(); autonyms stay constant across UI languages.
+        languagePopup.removeAllItems()
+        languagePopup.addItem(withTitle: "")
+        languagePopup.lastItem?.representedObject = Self.systemLanguageSentinel
+        for language in AppConfig.supportedUILanguages {
+            languagePopup.addItem(withTitle: language.autonym)
+            languagePopup.lastItem?.representedObject = language.identifier
+        }
+        languagePopup.target = self
+        languagePopup.action = #selector(languageChanged(_:))
 
         let providerRow = row(label: providerLabel, control: providerPopup)
         let modelRow = row(label: modelLabel, control: modelPopup)
@@ -147,7 +159,7 @@ final class SettingsWindowController: NSWindowController {
         let fastModeRow = row(label: fastModeLabel, control: fastModeCheckbox)
         let intervalRow = sliderRow(label: intervalLabel, slider: intervalSlider, valueLabel: intervalValueLabel)
         let monitorRow = sliderRow(label: monitorLabel, slider: monitorSlider, valueLabel: monitorValueLabel)
-        let languageRow = row(label: languageLabel, control: languageField)
+        let languageRow = row(label: languageLabel, control: languagePopup)
         let terminalRow = row(label: terminalLabel, control: terminalPopup)
         let buttonStack = NSStackView(views: [cancelButton, saveButton])
         buttonStack.orientation = .horizontal
@@ -167,7 +179,6 @@ final class SettingsWindowController: NSWindowController {
             terminalRow,
             effectiveLanguageField,
             detectedLanguageField,
-            languageHelpField,
             buttonStack
         ])
         stack.orientation = .vertical
@@ -188,11 +199,10 @@ final class SettingsWindowController: NSWindowController {
             intervalValueLabel.widthAnchor.constraint(equalToConstant: 64),
             monitorSlider.widthAnchor.constraint(equalToConstant: 200),
             monitorValueLabel.widthAnchor.constraint(equalToConstant: 64),
-            languageField.widthAnchor.constraint(equalToConstant: 100),
+            languagePopup.widthAnchor.constraint(equalToConstant: 200),
             terminalPopup.widthAnchor.constraint(equalToConstant: 260),
             effectiveLanguageField.widthAnchor.constraint(equalToConstant: 452),
-            detectedLanguageField.widthAnchor.constraint(equalToConstant: 452),
-            languageHelpField.widthAnchor.constraint(equalToConstant: 452)
+            detectedLanguageField.widthAnchor.constraint(equalToConstant: 452)
         ])
         reloadTerminalPopup(selecting: currentConfig.terminalAppBundleIdentifier)
         applyLocalizedText()
@@ -396,6 +406,40 @@ final class SettingsWindowController: NSWindowController {
         monitorValueLabel.stringValue = text.monitorDurationValue(seconds: selectedMonitorSeconds())
     }
 
+    // MARK: - Language selection
+
+    @objc private func languageChanged(_ sender: NSPopUpButton) {
+        // Live-preview the resolved language without committing; UI language stays put
+        // until Save, so the hint is shown in the current UI language.
+        let chosen = AppConfig.normalizedLanguageIdentifier(selectedLanguageIdentifier())
+        let resolved = chosen ?? AppConfig.defaultOutputLanguageIdentifier()
+        let text = AppStrings(languageIdentifier: currentConfig.resolvedOutputLanguageIdentifier())
+        effectiveLanguageField.stringValue = text.currentAnalysisLanguage(resolved)
+    }
+
+    private func selectedLanguageIdentifier() -> String {
+        (languagePopup.selectedItem?.representedObject as? String) ?? Self.systemLanguageSentinel
+    }
+
+    /// Selects the popup entry for `identifier` (nil → System default). An identifier that
+    /// isn't one of the shipped languages (e.g. a hand-edited config) is preserved as a
+    /// transient entry rather than silently dropped.
+    private func selectLanguage(identifier: String?) {
+        guard let identifier, !identifier.isEmpty else {
+            languagePopup.selectItem(at: 0)
+            return
+        }
+        if let index = languagePopup.itemArray.firstIndex(where: {
+            ($0.representedObject as? String) == identifier
+        }) {
+            languagePopup.selectItem(at: index)
+            return
+        }
+        languagePopup.addItem(withTitle: identifier)
+        languagePopup.lastItem?.representedObject = identifier
+        languagePopup.selectItem(at: languagePopup.numberOfItems - 1)
+    }
+
     private func applyLocalizedText() {
         let text = AppStrings(languageIdentifier: currentConfig.resolvedOutputLanguageIdentifier())
         window?.title = text.settingsWindowTitle
@@ -409,22 +453,22 @@ final class SettingsWindowController: NSWindowController {
         updateIntervalValueLabel()
         monitorLabel.stringValue = text.monitorDurationLabel
         updateMonitorValueLabel()
-        languageLabel.stringValue = text.analysisLanguageLabel
+        languageLabel.stringValue = text.languageLabel
+        // The "System default" entry (item 0) is the only popup title that localizes.
+        languagePopup.item(at: 0)?.title = text.systemDefaultLanguage
         terminalLabel.stringValue = text.terminalAppLabel
-        languageField.placeholderString = text.languagePlaceholder
         if terminalApplications.isEmpty, terminalPopup.numberOfItems > 0 {
             terminalPopup.item(at: 0)?.title = text.noTerminalAppsDetected
         }
         detectedLanguageField.stringValue = text.detectedMacOSLanguages(Self.detectedLanguageSummary())
         effectiveLanguageField.stringValue = text.currentAnalysisLanguage(currentConfig.resolvedOutputLanguageIdentifier())
-        languageHelpField.stringValue = text.languageHelp
         saveButton.title = text.save
         cancelButton.title = text.cancel
     }
 
     @objc private func save(_ sender: NSButton) {
         let interval = selectedIntervalSeconds()
-        let languageIdentifier = AppConfig.normalizedLanguageIdentifier(languageField.stringValue)
+        let languageIdentifier = AppConfig.normalizedLanguageIdentifier(selectedLanguageIdentifier())
 
         // Resolve the chosen model: a catalog slug, or the trimmed custom field.
         let chosenModel: String

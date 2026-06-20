@@ -45,6 +45,17 @@ mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_FRAMEWORKS"
 cp "$BUILD_BINARY" "$APP_MACOS/$APP_NAME"
 chmod +x "$APP_MACOS/$APP_NAME"
 
+# SwiftPM emits the Core target's resources (localized <locale>.lproj/Localizable.strings)
+# as a standalone bundle. `Bundle.module` resolves it via `Bundle.main.resourceURL`, so it
+# MUST live in Contents/Resources or every localized string silently falls back to the key.
+CORE_BUNDLE="MacOptimizingLooper_MacOptimizingLooperCore.bundle"
+if [[ -d "$BIN_PATH/$CORE_BUNDLE" ]]; then
+  ditto "$BIN_PATH/$CORE_BUNDLE" "$APP_RESOURCES/$CORE_BUNDLE"
+else
+  echo "ERROR: localized resource bundle not found at $BIN_PATH/$CORE_BUNDLE" >&2
+  exit 1
+fi
+
 # SwiftPM links @rpath/Sparkle.framework but never embeds it. Copy it in and add the
 # rpath so the binary resolves the framework from inside the bundle at runtime.
 ditto "$BIN_PATH/Sparkle.framework" "$APP_FRAMEWORKS/Sparkle.framework"

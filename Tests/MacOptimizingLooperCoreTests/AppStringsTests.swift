@@ -13,8 +13,8 @@ final class AppStringsTests: XCTestCase {
     func testAnalyzingElapsedFormatsEnglishDurations() {
         let strings = AppStrings(languageIdentifier: "en-US")
 
-        XCTAssertEqual(strings.analyzingElapsed(seconds: 7), "Analyzing... 7s")
-        XCTAssertEqual(strings.analyzingElapsed(seconds: 125), "Analyzing... 2m 5s")
-        XCTAssertEqual(strings.analyzingElapsed(seconds: 7_260), "Analyzing... 2h 1m")
+        XCTAssertEqual(strings.analyzingElapsed(seconds: 7), "Analyzing… 7s")
+        XCTAssertEqual(strings.analyzingElapsed(seconds: 125), "Analyzing… 2m 5s")
+        XCTAssertEqual(strings.analyzingElapsed(seconds: 7_260), "Analyzing… 2h 1m")
     }
 }

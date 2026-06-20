@@ -1,0 +1,109 @@
+/* Mac Optimizing Looper — Français. en.lproj/Localizable.strings est la référence.
+   Les paramètres « %@ » doivent respecter l'ordre des appels dans AppStrings.swift. */
+
+/* Barre de menus + état */
+"app.accessibility" = "Conseiller de charge";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "En attente d'analyse";
+"config.warning.title" = "⚠️ Erreur du fichier de configuration — exécution avec les réglages par défaut";
+"analyzing" = "Analyse en cours…";
+"analyzingElapsed" = "Analyse en cours… %@";
+"suggestions.none" = "Aucune suggestion pour l'instant";
+"lastChecked.label" = "Dernière vérification";
+"mem.short" = "Mém.";
+
+/* Actions du menu */
+"analyze.now" = "Analyser maintenant";
+"menu.settings" = "Réglages…";
+"menu.checkForUpdates" = "Rechercher les mises à jour…";
+"menu.quit" = "Quitter";
+
+/* Actions sur une suggestion */
+"action.showInTerminal" = "Afficher la commande dans le Terminal";
+"action.reviewWithClaude" = "Examiner avec Claude";
+"action.reviewWith" = "Examiner avec %@";
+"action.copyCommand" = "Copier la commande";
+"action.runNow" = "Exécuter la commande maintenant";
+"action.runDone" = "Terminé · Réexécuter";
+"action.run" = "Exécuter";
+"reason.label" = "Raison";
+
+/* Sécurité / autorisation d'exécution */
+"dangerous.title" = "Commande potentiellement dangereuse";
+"dangerous.prompt.lead" = "Exécuter cette commande ?";
+"dangerous.prompt.reasonPrefix" = "Raison : %@";
+"safety.checking" = "Vérification de la sûreté de la commande…";
+"safety.unavailable" = "Impossible d'effectuer la vérification de sûreté (vérifiez le CLI claude) ; une confirmation est donc requise.";
+"command.running" = "Exécution de la commande…";
+
+/* Résultat de la commande */
+"result.windowTitle" = "Résultat de la commande";
+"result.clickToView" = "Cliquez pour afficher la sortie";
+"result.noOutput" = "(aucune sortie)";
+"result.exitCodeLabel" = "code de sortie";
+"result.ranWithAdmin" = "Exécutée avec les privilèges administrateur";
+
+/* Terminal */
+"terminal.openFailed" = "Échec de l'ouverture du Terminal";
+"terminal.appNotFound" = "Application de terminal configurée introuvable : %@. Sélectionnez de nouveau un terminal dans les Réglages.";
+"terminal.appNotFound.none" = "(aucune)";
+"terminal.commandHeader" = "Commande suggérée par Mac Optimizing Looper (non exécutée) :";
+"terminal.commandFooter" = "Examinez-la avant de l'exécuter. Ne la collez et ne l'exécutez manuellement que si vous le souhaitez.";
+
+/* Examen Claude / erreurs du CLI */
+"claude.missing.title" = "CLI Claude introuvable";
+"claude.missing.message" = "Impossible de trouver l'exécutable claude.";
+"claude.reviewOpenFailed" = "Échec de l'ouverture de l'examen Claude";
+"claude.reviewStarting" = "Claude examine cette suggestion de Mac Optimizing Looper…";
+"claude.notExecutable" = "Le CLI Claude n'est pas exécutable au chemin configuré.";
+"claude.reviewPromptMissing" = "Le fichier d'invite d'examen est manquant.";
+
+/* Surfaces d'erreur du LLM */
+"error.providerCLINotFound" = "CLI %@ introuvable";
+"error.invalidResponseFormat" = "Format de réponse non valide";
+"error.decodingError" = "Erreur de décodage : %@";
+"macOptimizer.failedPrefix" = "échec de mac-optimizer";
+"analysisFailed" = "Échec de l'analyse : %@";
+"process.failed" = "Échec du processus %@%@";
+
+/* Fenêtre des réglages */
+"settings.windowTitle" = "Réglages de Mac Optimizing Looper";
+"settings.providerLabel" = "Fournisseur";
+"settings.modelLabel" = "Modèle";
+"settings.thinkingLevelLabel" = "Niveau de raisonnement";
+"settings.fastModeLabel" = "Mode rapide";
+"settings.fastModeCheckbox" = "Utiliser le niveau de service plus rapide (modèles compatibles uniquement)";
+"settings.customModelOption" = "Personnalisé…";
+"settings.analysisIntervalLabel" = "Intervalle d'analyse";
+"settings.monitorDurationLabel" = "Durée de surveillance";
+"settings.terminalAppLabel" = "Application de terminal";
+"settings.noTerminalAppsDetected" = "Aucune application de terminal détectée";
+"settings.languageLabel" = "Langue";
+"settings.language.systemDefault" = "Réglage par défaut du système";
+"save" = "Enregistrer";
+"cancel" = "Annuler";
+"ok" = "OK";
+"settings.savedRefreshing" = "Réglages enregistrés · actualisation de l'analyse";
+"settings.saveFailed" = "Échec de l'enregistrement des réglages";
+
+/* Réglages — libellés de contexte linguistique */
+"detectedMacOSLanguages" = "Langues macOS détectées : %@";
+"currentAnalysisLanguage" = "Langue d'analyse actuelle : %@";
+
+/* Libellés de valeur du curseur (unités compactes ; %@ est un entier sous forme de chaîne) */
+"interval.minutes" = "%@ min";
+"interval.hours" = "%@ h";
+"monitor.off" = "désactivé";
+"monitor.seconds" = "%@ s";
+
+/* Temps relatif « il y a X » (compact ; %@ est un entier sous forme de chaîne) */
+"time.justNow" = "à l'instant";
+"time.secondsAgo" = "il y a %@ s";
+"time.minutesAgo" = "il y a %@ min";
+"time.hoursAgo" = "il y a %@ h";
+"time.daysAgo" = "il y a %@ j";
+
+/* Temps d'analyse écoulé (compact ; %@ sont des entiers sous forme de chaîne) */
+"elapsed.seconds" = "%@ s";
+"elapsed.minutesSeconds" = "%@ min %@ s";
+"elapsed.hoursMinutes" = "%@ h %@ min";

@@ -1,0 +1,109 @@
+/* Mac Optimizing Looper — 繁體中文（台灣）。en.lproj/Localizable.strings 為正本。
+   "%@" 佔位符的順序必須與 AppStrings.swift 呼叫端一致。 */
+
+/* 選單列 + 狀態 */
+"app.accessibility" = "負載顧問";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "等待分析";
+"config.warning.title" = "⚠️ 設定檔錯誤 — 以預設值執行";
+"analyzing" = "分析中…";
+"analyzingElapsed" = "分析中… %@";
+"suggestions.none" = "尚無建議";
+"lastChecked.label" = "上次檢查";
+"mem.short" = "記憶體";
+
+/* 選單動作 */
+"analyze.now" = "立即分析";
+"menu.settings" = "設定…";
+"menu.checkForUpdates" = "檢查更新…";
+"menu.quit" = "結束";
+
+/* 建議列動作 */
+"action.showInTerminal" = "在終端機顯示指令";
+"action.reviewWithClaude" = "用 Claude 檢閱";
+"action.reviewWith" = "用 %@ 檢閱";
+"action.copyCommand" = "拷貝指令";
+"action.runNow" = "立即執行指令";
+"action.runDone" = "完成 · 再次執行";
+"action.run" = "執行";
+"reason.label" = "原因";
+
+/* 安全檢查 / 執行控管 */
+"dangerous.title" = "可能危險的指令";
+"dangerous.prompt.lead" = "要執行這個指令嗎？";
+"dangerous.prompt.reasonPrefix" = "原因：%@";
+"safety.checking" = "正在檢查指令安全性…";
+"safety.unavailable" = "無法執行安全檢查（請確認 claude CLI），因此需要再次確認。";
+"command.running" = "正在執行指令…";
+
+/* 執行結果 */
+"result.windowTitle" = "指令執行結果";
+"result.clickToView" = "點按以檢視輸出";
+"result.noOutput" = "（無輸出）";
+"result.exitCodeLabel" = "結束代碼";
+"result.ranWithAdmin" = "已以管理者權限執行";
+
+/* 終端機 */
+"terminal.openFailed" = "無法開啟終端機";
+"terminal.appNotFound" = "找不到設定的終端機 App：%@。請至設定重新選擇終端機。";
+"terminal.appNotFound.none" = "（未設定）";
+"terminal.commandHeader" = "Mac Optimizing Looper 建議的指令（尚未執行）：";
+"terminal.commandFooter" = "請先檢閱再執行。只在你決定時才手動貼上／執行。";
+
+/* Claude 檢閱 / CLI 錯誤 */
+"claude.missing.title" = "找不到 Claude CLI";
+"claude.missing.message" = "找不到 claude 執行檔。";
+"claude.reviewOpenFailed" = "無法開啟 Claude 檢閱";
+"claude.reviewStarting" = "Claude 正在檢閱這則 Mac Optimizing Looper 建議…";
+"claude.notExecutable" = "設定路徑上的 Claude CLI 無法執行。";
+"claude.reviewPromptMissing" = "找不到檢閱提示檔。";
+
+/* LLM 錯誤顯示 */
+"error.providerCLINotFound" = "找不到 %@ CLI";
+"error.invalidResponseFormat" = "回應格式無效";
+"error.decodingError" = "解碼錯誤：%@";
+"macOptimizer.failedPrefix" = "mac-optimizer 失敗";
+"analysisFailed" = "分析失敗：%@";
+"process.failed" = "程序失敗 %@%@";
+
+/* 設定視窗 */
+"settings.windowTitle" = "Mac Optimizing Looper 設定";
+"settings.providerLabel" = "供應商";
+"settings.modelLabel" = "模型";
+"settings.thinkingLevelLabel" = "思考強度";
+"settings.fastModeLabel" = "快速模式";
+"settings.fastModeCheckbox" = "使用較快的服務層級（僅限支援的模型）";
+"settings.customModelOption" = "自訂…";
+"settings.analysisIntervalLabel" = "分析間隔";
+"settings.monitorDurationLabel" = "監測時長";
+"settings.terminalAppLabel" = "終端機 App";
+"settings.noTerminalAppsDetected" = "未偵測到終端機 App";
+"settings.languageLabel" = "語言";
+"settings.language.systemDefault" = "系統預設";
+"save" = "儲存";
+"cancel" = "取消";
+"ok" = "好";
+"settings.savedRefreshing" = "設定已儲存 · 正在重新分析";
+"settings.saveFailed" = "設定儲存失敗";
+
+/* 設定 — 語言說明標籤 */
+"detectedMacOSLanguages" = "偵測到的 macOS 語言：%@";
+"currentAnalysisLanguage" = "目前的分析語言：%@";
+
+/* 滑桿數值標籤（%@ = 整數字串） */
+"interval.minutes" = "%@分鐘";
+"interval.hours" = "%@小時";
+"monitor.off" = "關閉";
+"monitor.seconds" = "%@秒";
+
+/* 相對時間「X 前」（%@ = 整數字串） */
+"time.justNow" = "剛剛";
+"time.secondsAgo" = "%@秒前";
+"time.minutesAgo" = "%@分鐘前";
+"time.hoursAgo" = "%@小時前";
+"time.daysAgo" = "%@天前";
+
+/* 分析經過時間（%@ = 整數字串） */
+"elapsed.seconds" = "%@秒";
+"elapsed.minutesSeconds" = "%@分%@秒";
+"elapsed.hoursMinutes" = "%@小時%@分";

@@ -129,8 +129,16 @@ enforced by `GuardrailTests`.
 
 - **No silent fallbacks / no silent failure.** Surface errors; never substitute behavior
   the user didn't choose without telling them.
-- i18n: `AppStrings` is the only place for user-facing text (English + Korean). Add new
-  strings there, never hardcode UI text in views/controllers.
+- i18n: UI chrome is fully localized via `<locale>.lproj/Localizable.strings` under
+  `Sources/MacOptimizingLooperCore/Resources` (10 languages: en, ko, zh-Hans, zh-Hant,
+  ja, es, de, fr, pt-BR, ru). `en` is the source of truth; every key MUST exist in every
+  locale (`LocalizationTests` enforces parity). `AppStrings(languageIdentifier:)` is the
+  ONLY access point — it loads the forced locale's `.lproj` sub-bundle via
+  `LocalizationBundle` (region/script collapse + English fallback). Never hardcode UI text
+  or branch on `isKorean`. Add a key to `en.lproj` first, then every other locale (same
+  `%@` count/order). The Settings "Language" popup is driven by `AppConfig.supportedUILanguages`
+  and writes `outputLanguageIdentifier`, which drives BOTH the UI language and the analysis
+  output language. To add a locale: new `<id>.lproj`, a `supportedUILanguages` entry, done.
 - Tests: `Tests/MacOptimizingLooperCoreTests`. Keep `GuardrailTests` green — it encodes the
   safety contract. Update it deliberately when the contract intentionally changes.
 - Bundle id prefix for any new bundles: keep `as.kargn.*` consistent with the

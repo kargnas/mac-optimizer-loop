@@ -1,0 +1,109 @@
+/* Mac Optimizing Looper — 日本語。en.lproj/Localizable.strings が正本。
+   "%@" プレースホルダーは AppStrings.swift の呼び出し側の順序と一致させること。 */
+
+/* メニューバー + ステータス */
+"app.accessibility" = "負荷アドバイザー";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "分析を待機中";
+"config.warning.title" = "⚠️ 設定ファイルエラー — デフォルト設定で実行中";
+"analyzing" = "分析中…";
+"analyzingElapsed" = "分析中… %@";
+"suggestions.none" = "提案はまだありません";
+"lastChecked.label" = "最終チェック";
+"mem.short" = "メモリ";
+
+/* メニュー操作 */
+"analyze.now" = "今すぐ分析";
+"menu.settings" = "設定…";
+"menu.checkForUpdates" = "アップデートを確認…";
+"menu.quit" = "終了";
+
+/* 提案行の操作 */
+"action.showInTerminal" = "ターミナルにコマンドを表示";
+"action.reviewWithClaude" = "Claude でレビュー";
+"action.reviewWith" = "%@ でレビュー";
+"action.copyCommand" = "コマンドをコピー";
+"action.runNow" = "コマンドをすぐに実行";
+"action.runDone" = "完了 · もう一度実行";
+"action.run" = "実行";
+"reason.label" = "理由";
+
+/* 安全性チェック / 実行ゲート */
+"dangerous.title" = "危険な可能性のあるコマンド";
+"dangerous.prompt.lead" = "このコマンドを実行しますか？";
+"dangerous.prompt.reasonPrefix" = "理由: %@";
+"safety.checking" = "コマンドの安全性を確認中…";
+"safety.unavailable" = "安全性チェックを実行できなかったため（claude CLI を確認してください）、確認が必要です。";
+"command.running" = "コマンドを実行中…";
+
+/* 実行結果 */
+"result.windowTitle" = "コマンドの実行結果";
+"result.clickToView" = "クリックして出力を表示";
+"result.noOutput" = "（出力なし）";
+"result.exitCodeLabel" = "終了コード";
+"result.ranWithAdmin" = "管理者権限で実行しました";
+
+/* ターミナル */
+"terminal.openFailed" = "ターミナルを開けませんでした";
+"terminal.appNotFound" = "設定されたターミナルアプリが見つかりません: %@。設定でターミナルを選び直してください。";
+"terminal.appNotFound.none" = "（未設定）";
+"terminal.commandHeader" = "Mac Optimizing Looper が提案したコマンド（未実行）:";
+"terminal.commandFooter" = "実行する前に内容を確認してください。必要な場合のみ、手動で貼り付けて実行してください。";
+
+/* Claude レビュー / CLI エラー */
+"claude.missing.title" = "Claude CLI が見つかりません";
+"claude.missing.message" = "claude 実行ファイルが見つかりませんでした。";
+"claude.reviewOpenFailed" = "Claude レビューを開けませんでした";
+"claude.reviewStarting" = "Claude がこの Mac Optimizing Looper の提案をレビューしています…";
+"claude.notExecutable" = "設定されたパスで Claude CLI を実行できません。";
+"claude.reviewPromptMissing" = "レビュー用プロンプトファイルが見つかりません。";
+
+/* LLM エラー表示 */
+"error.providerCLINotFound" = "%@ CLI が見つかりません";
+"error.invalidResponseFormat" = "レスポンスの形式が不正です";
+"error.decodingError" = "デコードエラー: %@";
+"macOptimizer.failedPrefix" = "mac-optimizer が失敗しました";
+"analysisFailed" = "分析に失敗しました: %@";
+"process.failed" = "プロセスが失敗しました %@%@";
+
+/* 設定ウインドウ */
+"settings.windowTitle" = "Mac Optimizing Looper 設定";
+"settings.providerLabel" = "プロバイダ";
+"settings.modelLabel" = "モデル";
+"settings.thinkingLevelLabel" = "思考レベル";
+"settings.fastModeLabel" = "高速モード";
+"settings.fastModeCheckbox" = "高速サービスティアを使用（対応モデルのみ）";
+"settings.customModelOption" = "カスタム…";
+"settings.analysisIntervalLabel" = "分析間隔";
+"settings.monitorDurationLabel" = "モニタリング時間";
+"settings.terminalAppLabel" = "ターミナルアプリ";
+"settings.noTerminalAppsDetected" = "ターミナルアプリが見つかりません";
+"settings.languageLabel" = "言語";
+"settings.language.systemDefault" = "システムのデフォルト";
+"save" = "保存";
+"cancel" = "キャンセル";
+"ok" = "OK";
+"settings.savedRefreshing" = "設定を保存しました · 分析を更新中";
+"settings.saveFailed" = "設定を保存できませんでした";
+
+/* 設定 — 言語の案内ラベル */
+"detectedMacOSLanguages" = "検出された macOS の言語: %@";
+"currentAnalysisLanguage" = "現在の分析言語: %@";
+
+/* スライダーの値ラベル（コンパクトな単位。%@ は整数の文字列） */
+"interval.minutes" = "%@分";
+"interval.hours" = "%@時間";
+"monitor.off" = "オフ";
+"monitor.seconds" = "%@秒";
+
+/* 相対時間「X前」（コンパクト。%@ は整数の文字列） */
+"time.justNow" = "たった今";
+"time.secondsAgo" = "%@秒前";
+"time.minutesAgo" = "%@分前";
+"time.hoursAgo" = "%@時間前";
+"time.daysAgo" = "%@日前";
+
+/* 分析の経過時間（コンパクト。%@ は整数の文字列） */
+"elapsed.seconds" = "%@秒";
+"elapsed.minutesSeconds" = "%@分%@秒";
+"elapsed.hoursMinutes" = "%@時間%@分";

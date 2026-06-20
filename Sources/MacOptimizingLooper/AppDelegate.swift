@@ -829,13 +829,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             case .missingClaudeCLI:
                 return text.missingClaudeCLITitle
             case .missingProviderCLI(let provider):
-                return text.isKorean ? "\(provider) CLI를 찾을 수 없음" : "\(provider) CLI not found"
+                return text.providerCLINotFound(provider: provider)
             case .processFailed(let status, let message):
                 return text.processFailed(status: status, message: message)
             case .invalidResponse:
-                return text.isKorean ? "응답 형식 오류" : "Invalid response format"
+                return text.invalidResponseFormat
             case .decoding(let message):
-                return text.isKorean ? "디코딩 오류 \(message)" : "Decoding error \(message)"
+                return text.decodingError(message)
             }
         }
         return String(describing: error)

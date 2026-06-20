@@ -1,0 +1,111 @@
+/* Mac Optimizing Looper — UI chrome strings. English is the source of truth;
+   every other <locale>.lproj is translated from this file. Keys are dot-namespaced.
+   "%@" placeholders receive Swift-side stringified values (numbers included), so the
+   order of %@ in a value MUST match the call site in AppStrings.swift. */
+
+/* Menu bar + status */
+"app.accessibility" = "Load Advisor";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "Waiting for analysis";
+"config.warning.title" = "⚠️ Config file error — running with defaults";
+"analyzing" = "Analyzing…";
+"analyzingElapsed" = "Analyzing… %@";
+"suggestions.none" = "No suggestions yet";
+"lastChecked.label" = "Last checked";
+"mem.short" = "MEM";
+
+/* Menu actions */
+"analyze.now" = "Analyze Now";
+"menu.settings" = "Settings…";
+"menu.checkForUpdates" = "Check for Updates…";
+"menu.quit" = "Quit";
+
+/* Suggestion row actions */
+"action.showInTerminal" = "Show Command in Terminal";
+"action.reviewWithClaude" = "Review with Claude";
+"action.reviewWith" = "Review with %@";
+"action.copyCommand" = "Copy Command";
+"action.runNow" = "Run Command Now";
+"action.runDone" = "Done · Run Again";
+"action.run" = "Run";
+"reason.label" = "Reason";
+
+/* Safety / run gating */
+"dangerous.title" = "Potentially Dangerous Command";
+"dangerous.prompt.lead" = "Run this command?";
+"dangerous.prompt.reasonPrefix" = "Reason: %@";
+"safety.checking" = "Checking command safety…";
+"safety.unavailable" = "Couldn't run the safety check (verify the claude CLI), so confirmation is required.";
+"command.running" = "Running command…";
+
+/* Command result */
+"result.windowTitle" = "Command Result";
+"result.clickToView" = "Click to view output";
+"result.noOutput" = "(no output)";
+"result.exitCodeLabel" = "exit code";
+"result.ranWithAdmin" = "Ran with administrator privileges";
+
+/* Terminal */
+"terminal.openFailed" = "Failed to Open Terminal";
+"terminal.appNotFound" = "Configured terminal app not found: %@. Re-select a terminal in Settings.";
+"terminal.appNotFound.none" = "(none)";
+"terminal.commandHeader" = "Mac Optimizing Looper suggested command (not executed):";
+"terminal.commandFooter" = "Review it before running. Paste/run manually only if you choose.";
+
+/* Claude review / CLI errors */
+"claude.missing.title" = "Claude CLI Not Found";
+"claude.missing.message" = "Could not find the claude executable.";
+"claude.reviewOpenFailed" = "Failed to Open Claude Review";
+"claude.reviewStarting" = "Claude is reviewing this Mac Optimizing Looper suggestion…";
+"claude.notExecutable" = "Claude CLI is not executable at the configured path.";
+"claude.reviewPromptMissing" = "Review prompt file is missing.";
+
+/* LLM error surfaces */
+"error.providerCLINotFound" = "%@ CLI not found";
+"error.invalidResponseFormat" = "Invalid response format";
+"error.decodingError" = "Decoding error: %@";
+"macOptimizer.failedPrefix" = "mac-optimizer failed";
+"analysisFailed" = "Analysis failed: %@";
+"process.failed" = "Process failed %@%@";
+
+/* Settings window */
+"settings.windowTitle" = "Mac Optimizing Looper Settings";
+"settings.providerLabel" = "Provider";
+"settings.modelLabel" = "Model";
+"settings.thinkingLevelLabel" = "Thinking Level";
+"settings.fastModeLabel" = "Fast Mode";
+"settings.fastModeCheckbox" = "Use faster service tier (supported models only)";
+"settings.customModelOption" = "Custom…";
+"settings.analysisIntervalLabel" = "Analysis Interval";
+"settings.monitorDurationLabel" = "Monitor Duration";
+"settings.terminalAppLabel" = "Terminal App";
+"settings.noTerminalAppsDetected" = "No terminal apps detected";
+"settings.languageLabel" = "Language";
+"settings.language.systemDefault" = "System default";
+"save" = "Save";
+"cancel" = "Cancel";
+"ok" = "OK";
+"settings.savedRefreshing" = "Settings saved · refreshing analysis";
+"settings.saveFailed" = "Failed to Save Settings";
+
+/* Settings — language context labels */
+"detectedMacOSLanguages" = "Detected macOS languages: %@";
+"currentAnalysisLanguage" = "Current analysis language: %@";
+
+/* Slider value labels (compact units; %@ is a stringified integer) */
+"interval.minutes" = "%@m";
+"interval.hours" = "%@h";
+"monitor.off" = "off";
+"monitor.seconds" = "%@s";
+
+/* Relative "X ago" (compact; %@ is a stringified integer) */
+"time.justNow" = "just now";
+"time.secondsAgo" = "%@s ago";
+"time.minutesAgo" = "%@m ago";
+"time.hoursAgo" = "%@h ago";
+"time.daysAgo" = "%@d ago";
+
+/* Elapsed analysis time (compact; %@ are stringified integers) */
+"elapsed.seconds" = "%@s";
+"elapsed.minutesSeconds" = "%@m %@s";
+"elapsed.hoursMinutes" = "%@h %@m";

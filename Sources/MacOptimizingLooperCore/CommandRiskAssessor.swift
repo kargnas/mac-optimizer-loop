@@ -88,8 +88,10 @@ public struct CommandRiskAssessor {
     }
 
     static func systemPrompt(languageIdentifier: String) -> String {
-        let isKorean = languageIdentifier.lowercased().hasPrefix("ko")
-        let reasonLanguage = isKorean ? "Korean" : "English"
+        // English exonym of the target locale (e.g. "Korean", "Japanese",
+        // "Portuguese (Brazil)") so the model writes REASON in the user's language.
+        let reasonLanguage = Locale(identifier: "en")
+            .localizedString(forIdentifier: languageIdentifier) ?? "English"
         return """
         You are a macOS shell-command safety classifier. Decide whether running the \
         given command could cause data loss, irreversible change, security exposure, \

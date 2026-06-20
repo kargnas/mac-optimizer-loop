@@ -1,53 +1,123 @@
 import Foundation
 
+/// Resolves a forced locale identifier to its `.lproj` sub-bundle inside `Bundle.module`.
+///
+/// The app drives a *chosen* UI language (config override or system locale), which the
+/// system-bound `NSLocalizedString(_:comment:)` cannot honor — that one keys off the
+/// process's preferred-language list. So we locate the exact `.lproj` for the requested
+/// locale and read strings from that bundle. Missing keys fall back to en because the
+/// returned bundle's own `Localizable.strings` is consulted; if the whole locale is
+/// absent we hand back `.module` (default localization = en).
+enum LocalizationBundle {
+    private static var cache: [String: Bundle] = [:]
+    private static let lock = NSLock()
+
+    static func bundle(for languageIdentifier: String) -> Bundle {
+        let key = languageIdentifier.isEmpty ? "en" : languageIdentifier
+        lock.lock()
+        defer { lock.unlock() }
+        if let cached = cache[key] { return cached }
+        let resolved = resolve(key)
+        cache[key] = resolved
+        return resolved
+    }
+
+    private static func resolve(_ identifier: String) -> Bundle {
+        for candidate in candidates(for: identifier) {
+            // SwiftPM lowercases generated .lproj directory names (e.g. `zh-hans.lproj`,
+            // `pt-br.lproj`), and path(forResource:) is case-sensitive — so match lowercased.
+            if let path = Bundle.module.path(forResource: candidate.lowercased(), ofType: "lproj"),
+               let bundle = Bundle(path: path) {
+                return bundle
+            }
+        }
+        return .module
+    }
+
+    /// Ordered most-specific → least-specific `.lproj` names to try, always ending at "en".
+    /// Handles Chinese script collapse (zh → zh-Hans/zh-Hant) and pt → pt-BR since those
+    /// are the only Chinese/Portuguese variants we ship.
+    private static func candidates(for identifier: String) -> [String] {
+        let locale = Locale(identifier: identifier)
+        let language = locale.language.languageCode?.identifier.lowercased()
+            ?? String(identifier.prefix(2)).lowercased()
+        let script = locale.language.script?.identifier            // e.g. "Hans"/"Hant"
+        let region = locale.region?.identifier                     // e.g. "KR"/"BR"/"TW"
+
+        var list: [String] = [identifier]
+        let dashed = identifier.replacingOccurrences(of: "_", with: "-")
+        if dashed != identifier { list.append(dashed) }
+
+        if language == "zh" {
+            if let script { list.append("zh-\(script)") }
+            if let region {
+                list.append(["TW", "HK", "MO"].contains(region) ? "zh-Hant" : "zh-Hans")
+            }
+            list.append("zh-Hans")   // bare "zh" → Simplified
+        }
+        if language == "pt" { list.append("pt-BR") }   // only Brazilian Portuguese shipped
+
+        if let region { list.append("\(language)-\(region)") }
+        if let script { list.append("\(language)-\(script)") }
+        list.append(language)
+        list.append("en")
+        return list
+    }
+}
+
+/// User-facing UI chrome text. Construct with the *resolved* locale identifier (config
+/// override or system locale); all strings come from that locale's `.lproj`, falling back
+/// to English. Analysis-output language is a separate concern handled in the prompts.
 public struct AppStrings {
     public let languageIdentifier: String
+    private let bundle: Bundle
 
     public init(languageIdentifier: String) {
         self.languageIdentifier = languageIdentifier
+        self.bundle = LocalizationBundle.bundle(for: languageIdentifier)
     }
 
-    public var isKorean: Bool {
-        languageIdentifier.lowercased().hasPrefix("ko")
+    private func str(_ key: String) -> String {
+        NSLocalizedString(key, bundle: bundle, comment: "")
     }
 
-    public var appAccessibilityDescription: String { isKorean ? "부하 어드바이저" : "Load Advisor" }
-    public var appTooltip: String { isKorean ? "Mac Optimizing Looper" : "Mac Optimizing Looper" }
-    public var analysisWaiting: String { isKorean ? "분석 대기 중" : "Waiting for analysis" }
-    public var configurationWarningTitle: String { isKorean ? "⚠️ 설정 파일 오류 — 기본값으로 실행 중" : "⚠️ Config file error — running with defaults" }
-    public var analyzing: String { isKorean ? "분석 중…" : "Analyzing..." }
-    public var noSuggestions: String { isKorean ? "아직 제안이 없습니다" : "No suggestions yet" }
-    public var analyzeNow: String { isKorean ? "지금 분석" : "Analyze Now" }
-    public var settingsMenuItem: String { isKorean ? "설정…" : "Settings..." }
-    public var checkForUpdatesMenuItem: String { isKorean ? "업데이트 확인…" : "Check for Updates..." }
-    public var quit: String { isKorean ? "종료" : "Quit" }
-    public var openCommandInTerminal: String { isKorean ? "터미널에 명령어 띄우기" : "Show Command in Terminal" }
-    public var reviewWithClaude: String { isKorean ? "Claude로 검토" : "Review with Claude" }
-    /// Provider-aware variant of the review action label (e.g. "Codex로 검토").
-    public func reviewWith(provider: String) -> String {
-        isKorean ? "\(provider)로 검토" : "Review with \(provider)"
+    /// `String(format:)` over a localized template. `%@` placeholders take Swift strings
+    /// (numbers are stringified at the call site so format specifiers stay locale-safe).
+    private func fmt(_ key: String, _ args: CVarArg...) -> String {
+        String(format: str(key), arguments: args)
     }
-    public var copyCommand: String { isKorean ? "명령어 복사" : "Copy Command" }
-    public var runCommandNow: String { isKorean ? "명령 바로 실행" : "Run Command Now" }
-    public var runCommandDone: String { isKorean ? "실행 완료 · 다시 실행" : "Done · Run Again" }
-    public var dangerousCommandTitle: String { isKorean ? "위험할 수 있는 명령" : "Potentially Dangerous Command" }
-    public var runAnyway: String { isKorean ? "실행" : "Run" }
-    public var checkingCommandSafety: String { isKorean ? "명령 위험 검사 중…" : "Checking command safety…" }
-    public var runningCommand: String { isKorean ? "명령 실행 중…" : "Running command…" }
-    public var resultWindowTitle: String { isKorean ? "실행 결과" : "Command Result" }
-    public var clickToViewOutput: String { isKorean ? "클릭하여 출력 보기" : "Click to view output" }
-    public var noOutput: String { isKorean ? "(출력 없음)" : "(no output)" }
-    public var exitCodeLabel: String { isKorean ? "종료 코드" : "exit code" }
-    public var ranWithAdministrator: String { isKorean ? "관리자 권한으로 실행됨" : "Ran with administrator privileges" }
-    public var safetyCheckUnavailable: String {
-        isKorean
-            ? "위험 검사를 실행할 수 없어(claude CLI 확인) 안전을 위해 확인이 필요합니다."
-            : "Couldn't run the safety check (verify the claude CLI), so confirmation is required."
-    }
+
+    public var appAccessibilityDescription: String { str("app.accessibility") }
+    public var appTooltip: String { str("app.tooltip") }
+    public var analysisWaiting: String { str("analysis.waiting") }
+    public var configurationWarningTitle: String { str("config.warning.title") }
+    public var analyzing: String { str("analyzing") }
+    public var noSuggestions: String { str("suggestions.none") }
+    public var analyzeNow: String { str("analyze.now") }
+    public var settingsMenuItem: String { str("menu.settings") }
+    public var checkForUpdatesMenuItem: String { str("menu.checkForUpdates") }
+    public var quit: String { str("menu.quit") }
+    public var openCommandInTerminal: String { str("action.showInTerminal") }
+    public var reviewWithClaude: String { str("action.reviewWithClaude") }
+    /// Provider-aware variant of the review action label (e.g. "Review with Codex CLI").
+    public func reviewWith(provider: String) -> String { fmt("action.reviewWith", provider) }
+    public var copyCommand: String { str("action.copyCommand") }
+    public var runCommandNow: String { str("action.runNow") }
+    public var runCommandDone: String { str("action.runDone") }
+    public var dangerousCommandTitle: String { str("dangerous.title") }
+    public var runAnyway: String { str("action.run") }
+    public var checkingCommandSafety: String { str("safety.checking") }
+    public var runningCommand: String { str("command.running") }
+    public var resultWindowTitle: String { str("result.windowTitle") }
+    public var clickToViewOutput: String { str("result.clickToView") }
+    public var noOutput: String { str("result.noOutput") }
+    public var exitCodeLabel: String { str("result.exitCodeLabel") }
+    public var ranWithAdministrator: String { str("result.ranWithAdmin") }
+    public var safetyCheckUnavailable: String { str("safety.unavailable") }
 
     public func dangerousCommandPrompt(reason: String, command: String) -> String {
-        let reasonLine = reason.isEmpty ? "" : (isKorean ? "사유: \(reason)\n\n" : "Reason: \(reason)\n\n")
-        let lead = isKorean ? "이 명령을 실행할까요?" : "Run this command?"
+        let reasonLine = reason.isEmpty ? "" : (fmt("dangerous.prompt.reasonPrefix", reason) + "\n\n")
+        let lead = str("dangerous.prompt.lead")
         return "\(lead)\n\n\(reasonLine)\(command)"
     }
 
@@ -58,119 +128,123 @@ public struct AppStrings {
         let duration = String(format: "%.1fs", max(0, durationSeconds))
         return "\(exitCodeLabel) \(exitCode) · \(duration) · \(clickToViewOutput)"
     }
-    public var terminalOpenFailed: String { isKorean ? "터미널 열기 실패" : "Failed to Open Terminal" }
+    public var terminalOpenFailed: String { str("terminal.openFailed") }
     public func terminalAppNotFound(_ bundleIdentifier: String) -> String {
-        let id = bundleIdentifier.isEmpty ? (isKorean ? "(미설정)" : "(none)") : bundleIdentifier
-        return isKorean
-            ? "설정한 터미널 앱을 찾을 수 없습니다: \(id). 설정에서 터미널을 다시 선택하세요."
-            : "Configured terminal app not found: \(id). Re-select a terminal in Settings."
+        let id = bundleIdentifier.isEmpty ? str("terminal.appNotFound.none") : bundleIdentifier
+        return fmt("terminal.appNotFound", id)
     }
-    public var missingClaudeCLITitle: String { isKorean ? "Claude CLI 없음" : "Claude CLI Not Found" }
-    public var missingClaudeCLIMessage: String { isKorean ? "claude 실행 파일을 찾지 못했습니다." : "Could not find the claude executable." }
-    public var claudeReviewOpenFailed: String { isKorean ? "Claude 검토 열기 실패" : "Failed to Open Claude Review" }
-    public var settingsSavedRefreshing: String { isKorean ? "설정 저장됨 · 분석 갱신 중" : "Settings saved · refreshing analysis" }
-    public var settingsSaveFailed: String { isKorean ? "설정 저장 실패" : "Failed to Save Settings" }
-    public var ok: String { isKorean ? "확인" : "OK" }
-    public var memoryShortLabel: String { isKorean ? "메모리" : "MEM" }
-    public var reasonLabel: String { isKorean ? "이유" : "Reason" }
-    public var macOptimizerFailedPrefix: String { isKorean ? "mac-optimizer 실패" : "mac-optimizer failed" }
-    public var settingsWindowTitle: String { isKorean ? "Mac Optimizing Looper 설정" : "Mac Optimizing Looper Settings" }
-    public var claudeModelLabel: String { isKorean ? "Claude 모델" : "Claude Model" }
-    public var providerLabel: String { isKorean ? "프로바이더" : "Provider" }
-    public var modelLabel: String { isKorean ? "모델" : "Model" }
-    public var thinkingLevelLabel: String { isKorean ? "추론 강도" : "Thinking Level" }
-    public var fastModeLabel: String { isKorean ? "Fast 모드" : "Fast Mode" }
-    public var fastModeCheckbox: String { isKorean ? "빠른 서비스 티어 사용 (지원 모델만)" : "Use faster service tier (supported models only)" }
-    public var customModelOption: String { isKorean ? "직접 입력…" : "Custom…" }
-    public var analysisIntervalLabel: String { isKorean ? "분석 주기" : "Analysis Interval" }
+    public var missingClaudeCLITitle: String { str("claude.missing.title") }
+    public var missingClaudeCLIMessage: String { str("claude.missing.message") }
+    public var claudeReviewOpenFailed: String { str("claude.reviewOpenFailed") }
+    public var settingsSavedRefreshing: String { str("settings.savedRefreshing") }
+    public var settingsSaveFailed: String { str("settings.saveFailed") }
+    public var ok: String { str("ok") }
+    public var memoryShortLabel: String { str("mem.short") }
+    public var reasonLabel: String { str("reason.label") }
+    public var macOptimizerFailedPrefix: String { str("macOptimizer.failedPrefix") }
+    public var settingsWindowTitle: String { str("settings.windowTitle") }
+    public var providerLabel: String { str("settings.providerLabel") }
+    public var modelLabel: String { str("settings.modelLabel") }
+    public var thinkingLevelLabel: String { str("settings.thinkingLevelLabel") }
+    public var fastModeLabel: String { str("settings.fastModeLabel") }
+    public var fastModeCheckbox: String { str("settings.fastModeCheckbox") }
+    public var customModelOption: String { str("settings.customModelOption") }
+    public var analysisIntervalLabel: String { str("settings.analysisIntervalLabel") }
 
-    /// Short label for a discrete analysis-interval step (e.g. "60분"/"2시간"). Steps
-    /// up to 60 minutes read as minutes; longer steps read as whole hours.
+    /// Short label for a discrete analysis-interval step (e.g. "60m"/"2h"). Steps up to
+    /// 60 minutes read as minutes; longer steps read as whole hours.
     public func intervalLabel(seconds: Int) -> String {
         let minutes = max(0, seconds) / 60
         if minutes <= 60 {
-            return isKorean ? "\(minutes)분" : "\(minutes)m"
+            return fmt("interval.minutes", "\(minutes)")
         }
         let hours = minutes / 60
-        return isKorean ? "\(hours)시간" : "\(hours)h"
+        return fmt("interval.hours", "\(hours)")
     }
-    public var analysisLanguageLabel: String { isKorean ? "분석 결과 언어" : "Analysis Language" }
-    public var monitorDurationLabel: String { isKorean ? "모니터 수집 시간" : "Monitor Duration" }
+
+    /// Label for the unified UI + analysis language selector.
+    public var languageLabel: String { str("settings.languageLabel") }
+    /// Popup entry that defers to the current macOS language.
+    public var systemDefaultLanguage: String { str("settings.language.systemDefault") }
+    public var monitorDurationLabel: String { str("settings.monitorDurationLabel") }
 
     /// Value label for the monitor-duration slider; 0 reads as "off".
     public func monitorDurationValue(seconds: Int) -> String {
         if seconds <= 0 {
-            return isKorean ? "끄기" : "off"
+            return str("monitor.off")
         }
-        return isKorean ? "\(seconds)초" : "\(seconds)s"
+        return fmt("monitor.seconds", "\(seconds)")
     }
-    public var terminalAppLabel: String { isKorean ? "터미널 앱" : "Terminal App" }
-    public var noTerminalAppsDetected: String { isKorean ? "감지된 터미널 없음" : "No terminal apps detected" }
-    public var languagePlaceholder: String { isKorean ? "비우면 macOS 기본" : "Blank = macOS default" }
-    public var languageHelp: String {
-        isKorean
-            ? "비워두거나 system 입력 시 macOS 첫 번째 언어를 따릅니다. 한국어 고정은 ko-KR."
-            : "Leave blank or type system to follow the first macOS language. Use ko-KR to force Korean."
-    }
-    public var save: String { isKorean ? "저장" : "Save" }
-    public var cancel: String { isKorean ? "취소" : "Cancel" }
-    public var terminalCommandHeader: String { isKorean ? "Mac Optimizing Looper 제안 명령어(실행 안 함):" : "Mac Optimizing Looper suggested command (not executed):" }
-    public var terminalCommandFooter: String { isKorean ? "검토 후 필요할 때만 직접 붙여넣어 실행하세요." : "Review it before running. Paste/run manually only if you choose." }
-    public var claudeReviewStarting: String { isKorean ? "Claude가 Mac Optimizing Looper 제안을 검토하는 중입니다..." : "Claude is reviewing this Mac Optimizing Looper suggestion..." }
-    public var claudeNotExecutable: String { isKorean ? "설정된 경로에서 Claude CLI를 실행할 수 없습니다." : "Claude CLI is not executable at the configured path." }
-    public var reviewPromptMissing: String { isKorean ? "검토 프롬프트 파일을 찾을 수 없습니다." : "Review prompt file is missing." }
+    public var terminalAppLabel: String { str("settings.terminalAppLabel") }
+    public var noTerminalAppsDetected: String { str("settings.noTerminalAppsDetected") }
+    public var save: String { str("save") }
+    public var cancel: String { str("cancel") }
+    public var terminalCommandHeader: String { str("terminal.commandHeader") }
+    public var terminalCommandFooter: String { str("terminal.commandFooter") }
+    public var claudeReviewStarting: String { str("claude.reviewStarting") }
+    public var claudeNotExecutable: String { str("claude.notExecutable") }
+    public var reviewPromptMissing: String { str("claude.reviewPromptMissing") }
 
     public func detectedMacOSLanguages(_ summary: String) -> String {
-        isKorean ? "감지된 macOS 언어: \(summary)" : "Detected macOS languages: \(summary)"
+        fmt("detectedMacOSLanguages", summary)
     }
 
     public func currentAnalysisLanguage(_ language: String) -> String {
-        isKorean ? "현재 적용 분석 언어: \(language)" : "Current analysis language: \(language)"
+        fmt("currentAnalysisLanguage", language)
     }
 
     public func analysisFailed(_ message: String) -> String {
-        isKorean ? "분석 실패: \(message)" : "Analysis failed: \(message)"
+        fmt("analysisFailed", message)
     }
 
     public func analyzingElapsed(seconds: Int) -> String {
-        isKorean ? "분석 중… \(formatElapsed(seconds: seconds))" : "Analyzing... \(formatElapsed(seconds: seconds))"
+        fmt("analyzingElapsed", formatElapsed(seconds: seconds))
     }
 
-    public var lastCheckedLabel: String { isKorean ? "마지막 확인" : "Last checked" }
+    /// English-language error surfaces moved off inline `isKorean` branches in AppDelegate.
+    public func providerCLINotFound(provider: String) -> String {
+        fmt("error.providerCLINotFound", provider)
+    }
+    public var invalidResponseFormat: String { str("error.invalidResponseFormat") }
+    public func decodingError(_ message: String) -> String {
+        fmt("error.decodingError", message)
+    }
+
+    public var lastCheckedLabel: String { str("lastChecked.label") }
 
     /// Coarse "X ago" phrase for the menu-bar last-check time. The exact clock time
     /// is shown separately inside the dropdown (see `AdviceFormatter.lastCheckTimeString`).
     public func relativeTimeAgo(secondsAgo: Int) -> String {
         let s = max(0, secondsAgo)
-        if s < 10 { return isKorean ? "방금" : "just now" }
-        if s < 60 { return isKorean ? "\(s)초 전" : "\(s)s ago" }
+        if s < 10 { return str("time.justNow") }
+        if s < 60 { return fmt("time.secondsAgo", "\(s)") }
         let minutes = s / 60
-        if minutes < 60 { return isKorean ? "\(minutes)분 전" : "\(minutes)m ago" }
+        if minutes < 60 { return fmt("time.minutesAgo", "\(minutes)") }
         let hours = minutes / 60
-        if hours < 24 { return isKorean ? "\(hours)시간 전" : "\(hours)h ago" }
+        if hours < 24 { return fmt("time.hoursAgo", "\(hours)") }
         let days = hours / 24
-        return isKorean ? "\(days)일 전" : "\(days)d ago"
+        return fmt("time.daysAgo", "\(days)")
     }
 
     private func formatElapsed(seconds: Int) -> String {
         let safeSeconds = max(0, seconds)
         if safeSeconds < 60 {
-            return isKorean ? "\(safeSeconds)초" : "\(safeSeconds)s"
+            return fmt("elapsed.seconds", "\(safeSeconds)")
         }
 
         let minutes = safeSeconds / 60
         let remainingSeconds = safeSeconds % 60
         if minutes < 60 {
-            return isKorean ? "\(minutes)분 \(remainingSeconds)초" : "\(minutes)m \(remainingSeconds)s"
+            return fmt("elapsed.minutesSeconds", "\(minutes)", "\(remainingSeconds)")
         }
 
         let hours = minutes / 60
         let remainingMinutes = minutes % 60
-        return isKorean ? "\(hours)시간 \(remainingMinutes)분" : "\(hours)h \(remainingMinutes)m"
+        return fmt("elapsed.hoursMinutes", "\(hours)", "\(remainingMinutes)")
     }
 
     public func processFailed(status: Int32, message: String) -> String {
         let suffix = message.isEmpty ? "" : ": \(message)"
-        return isKorean ? "프로세스 실패 \(status)\(suffix)" : "Process failed \(status)\(suffix)"
+        return fmt("process.failed", "\(status)", suffix)
     }
 }

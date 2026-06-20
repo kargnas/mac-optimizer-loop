@@ -1,0 +1,109 @@
+/* Mac Optimizing Looper — русский. Источник истины: en.lproj/Localizable.strings.
+   Порядок "%@" должен совпадать с местом вызова в AppStrings.swift. */
+
+/* Строка меню + статус */
+"app.accessibility" = "Советник по нагрузке";
+"app.tooltip" = "Mac Optimizing Looper";
+"analysis.waiting" = "Ожидание анализа";
+"config.warning.title" = "⚠️ Ошибка файла настроек — работа со значениями по умолчанию";
+"analyzing" = "Анализ…";
+"analyzingElapsed" = "Анализ… %@";
+"suggestions.none" = "Пока нет рекомендаций";
+"lastChecked.label" = "Последняя проверка";
+"mem.short" = "RAM";
+
+/* Действия меню */
+"analyze.now" = "Анализировать сейчас";
+"menu.settings" = "Настройки…";
+"menu.checkForUpdates" = "Проверить обновления…";
+"menu.quit" = "Завершить";
+
+/* Действия в строке рекомендации */
+"action.showInTerminal" = "Показать команду в Терминале";
+"action.reviewWithClaude" = "Проверить через Claude";
+"action.reviewWith" = "Проверить через %@";
+"action.copyCommand" = "Скопировать команду";
+"action.runNow" = "Выполнить команду сейчас";
+"action.runDone" = "Готово · Выполнить снова";
+"action.run" = "Выполнить";
+"reason.label" = "Причина";
+
+/* Проверка безопасности / контроль выполнения */
+"dangerous.title" = "Потенциально опасная команда";
+"dangerous.prompt.lead" = "Выполнить эту команду?";
+"dangerous.prompt.reasonPrefix" = "Причина: %@";
+"safety.checking" = "Проверка безопасности команды…";
+"safety.unavailable" = "Не удалось выполнить проверку безопасности (проверьте claude CLI), поэтому требуется подтверждение.";
+"command.running" = "Выполнение команды…";
+
+/* Результат выполнения */
+"result.windowTitle" = "Результат команды";
+"result.clickToView" = "Нажмите, чтобы посмотреть вывод";
+"result.noOutput" = "(нет вывода)";
+"result.exitCodeLabel" = "код завершения";
+"result.ranWithAdmin" = "Выполнено с правами администратора";
+
+/* Терминал */
+"terminal.openFailed" = "Не удалось открыть Терминал";
+"terminal.appNotFound" = "Указанное приложение терминала не найдено: %@. Выберите терминал заново в настройках.";
+"terminal.appNotFound.none" = "(не задано)";
+"terminal.commandHeader" = "Команда, предложенная Mac Optimizing Looper (не выполнена):";
+"terminal.commandFooter" = "Проверьте её перед запуском. Вставляйте и выполняйте вручную только по своему выбору.";
+
+/* Проверка через Claude / ошибки CLI */
+"claude.missing.title" = "Claude CLI не найден";
+"claude.missing.message" = "Не удалось найти исполняемый файл claude.";
+"claude.reviewOpenFailed" = "Не удалось открыть проверку Claude";
+"claude.reviewStarting" = "Claude проверяет эту рекомендацию Mac Optimizing Looper…";
+"claude.notExecutable" = "Claude CLI не является исполняемым по указанному пути.";
+"claude.reviewPromptMissing" = "Файл запроса для проверки отсутствует.";
+
+/* Сообщения об ошибках LLM */
+"error.providerCLINotFound" = "CLI %@ не найден";
+"error.invalidResponseFormat" = "Неверный формат ответа";
+"error.decodingError" = "Ошибка декодирования: %@";
+"macOptimizer.failedPrefix" = "сбой mac-optimizer";
+"analysisFailed" = "Сбой анализа: %@";
+"process.failed" = "Сбой процесса %@%@";
+
+/* Окно настроек */
+"settings.windowTitle" = "Настройки Mac Optimizing Looper";
+"settings.providerLabel" = "Провайдер";
+"settings.modelLabel" = "Модель";
+"settings.thinkingLevelLabel" = "Уровень рассуждений";
+"settings.fastModeLabel" = "Быстрый режим";
+"settings.fastModeCheckbox" = "Использовать ускоренный уровень сервиса (только для поддерживаемых моделей)";
+"settings.customModelOption" = "Другое…";
+"settings.analysisIntervalLabel" = "Интервал анализа";
+"settings.monitorDurationLabel" = "Длительность мониторинга";
+"settings.terminalAppLabel" = "Приложение терминала";
+"settings.noTerminalAppsDetected" = "Терминалы не обнаружены";
+"settings.languageLabel" = "Язык";
+"settings.language.systemDefault" = "Системный язык";
+"save" = "Сохранить";
+"cancel" = "Отменить";
+"ok" = "OK";
+"settings.savedRefreshing" = "Настройки сохранены · обновление анализа";
+"settings.saveFailed" = "Не удалось сохранить настройки";
+
+/* Настройки — подписи к выбору языка */
+"detectedMacOSLanguages" = "Обнаруженные языки macOS: %@";
+"currentAnalysisLanguage" = "Текущий язык анализа: %@";
+
+/* Подписи значений ползунка (компактные единицы; %@ — целое число) */
+"interval.minutes" = "%@ мин";
+"interval.hours" = "%@ ч";
+"monitor.off" = "выкл";
+"monitor.seconds" = "%@ с";
+
+/* Относительное время «X назад» (компактно; %@ — целое число) */
+"time.justNow" = "только что";
+"time.secondsAgo" = "%@ с назад";
+"time.minutesAgo" = "%@ мин назад";
+"time.hoursAgo" = "%@ ч назад";
+"time.daysAgo" = "%@ д назад";
+
+/* Прошедшее время анализа (компактно; %@ — целые числа) */
+"elapsed.seconds" = "%@ с";
+"elapsed.minutesSeconds" = "%@ мин %@ с";
+"elapsed.hoursMinutes" = "%@ ч %@ мин";
