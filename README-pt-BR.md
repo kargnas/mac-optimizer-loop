@@ -7,11 +7,11 @@
 ![SwiftPM](https://img.shields.io/badge/SwiftPM-compatible-F05138?logo=swift&logoColor=white)
 ![Menu bar app](https://img.shields.io/badge/menu--bar-no%20Dock%20icon-success)
 
-**Seu Mac engasga → o Claude aponta o processo exato que está sugando tudo → um clique o encerra. Nada acontece até você clicar — então, nenhum risco para o seu Mac.**
+**Seu Mac engasga → o Claude aponta o processo exato que está sugando tudo → um clique o encerra. Nada acontece até você clicar — zero risco.**
 
-A cada hora, a carga do seu Mac vai para o Claude. Ele ranqueia o que *de verdade* está devorando sua CPU/RAM, escreve a correção exata e a entrega na sua barra de menus — pior primeiro, codificada por cor, a um clique de distância. E antes de qualquer coisa rodar, uma *segunda* passagem do Claude precisa liberar o comando como **SAFE**.
+A cada hora, a carga do seu Mac vai para o Claude. Ele ranqueia o que *de verdade* está devorando sua CPU/RAM, escreve a correção exata e a entrega na sua barra de menus — pior primeiro, com código de cores, a um clique de distância. E antes de qualquer coisa rodar, uma *segunda* passagem do Claude precisa liberar o comando como **SAFE**.
 
-O **Mac Optimizing Looper** é um app de barra de menus do macOS (sem ícone no Dock) que roda um ciclo contínuo de **observar → perguntar ao modelo → aconselhar → (opcionalmente) agir** sobre a CLI do seu LLM local.
+O **Mac Optimizing Looper** é um app de barra de menus do macOS (sem ícone no Dock) que roda um ciclo contínuo de **observar → perguntar ao modelo → aconselhar → (opcionalmente) agir** via a CLI do seu LLM local.
 
 [**⬇ Instalar**](#instalação) · [**Veja funcionando ↓**](#como-funciona)
 
@@ -30,7 +30,7 @@ Um ciclo, de cima a baixo:
 →  claude -p   (format pass → ranked JSON suggestions)
 ```
 
-A barra de menus mostra a contagem. A lista suspensa vem ranqueada **do pior primeiro**: 🔴 crítico → 🟡 aviso → 🟢 higiene. Cada linha se expande em **Copiar** · **Mostrar no Terminal** · **Revisar com o Claude** · **Executar Comando Agora**.
+A barra de menus mostra a contagem. A lista suspensa vem ranqueada **do pior primeiro**: 🔴 crítico → 🟡 aviso → 🟢 higiene. Cada linha te dá: **Copiar** · **Mostrar no Terminal** · **Revisar com o Claude** · **Executar Comando Agora**.
 
 ## A trava de segurança — por que ele não vai detonar seu Mac
 
@@ -44,7 +44,7 @@ click ▸ Run Command Now   ($ kill 8123)
 →  suggestion marked ✓ done
 ```
 
-Qualquer coisa que não seja classificada como `SAFE` — **inclusive `unknown`** — abre uma caixa de confirmação cujo botão padrão é **Cancelar**. O conselho em si é dado inerte; o modelo nunca consegue fazer o app rodar coisa alguma. Esse contrato é trancado a sete chaves pelos `GuardrailTests`.
+Qualquer coisa que não seja classificada como `SAFE` — **inclusive `unknown`** — abre uma caixa de confirmação cujo botão padrão é **Cancelar**. O conselho fica inerte; o modelo nunca consegue fazer o app rodar coisa alguma. Esse contrato é trancado a sete chaves pelos `GuardrailTests`.
 
 ## Mac Optimizing Looper vs. os suspeitos de sempre
 
@@ -77,17 +77,17 @@ Rode o **bundle**, não o binário cru — o `UNUserNotificationCenter` exige um
 
 ## Deixe do seu jeito
 
-Escolha **Provedor / Modelo / Velocidade / Modo Rápido** em Configurações — modelos e níveis de raciocínio são lidos **ao vivo** de cada CLI. O backend padrão é a CLI `claude`; o `codex` também é suportado (uma passagem única restrita por schema, sem etapa de formatação separada). A interface é totalmente localizada em **10 idiomas**, e o seletor de **Idioma** define tanto a interface *quanto* o idioma de saída da análise.
+Escolha **Provedor / Modelo / Velocidade / Modo Rápido** em Configurações — modelos e níveis de raciocínio são lidos **ao vivo** de cada CLI. O backend padrão é a CLI `claude`; o `codex` também é suportado (uma passagem única restrita por schema, sem etapa de formatação separada). A interface fala **10 idiomas**, e o seletor de **Idioma** muda tanto a interface *quanto* o idioma de saída da análise.
 
 <p align="center"><img src="docs/settings.png" alt="Configurações do Mac Optimizing Looper — provedor, modelo, idioma, intervalo" width="520"></p>
 
 ## Perguntas frequentes
 
 **Ele chega a rodar algo sozinho?**
-Não. O conselho é dado inerte. O único caminho de execução é o botão "Executar Comando Agora", no seu clique — garantido pelos `GuardrailTests`.
+Não. O conselho fica inerte. O único jeito de executar algo é o botão "Executar Comando Agora", no seu clique — garantido pelos `GuardrailTests`.
 
 **É seguro apertar "Executar"?**
-Todo comando passa por uma segunda passagem do Claude. Qualquer coisa que não seja claramente `SAFE` (inclusive `unknown`) abre uma caixa de confirmação com **Cancelar** como padrão. O `sudo` é roteado pela solicitação de senha gráfica do macOS.
+Todo comando passa por uma segunda passagem do Claude. Qualquer coisa que não seja claramente `SAFE` (inclusive `unknown`) abre uma caixa de confirmação com **Cancelar** como padrão. O `sudo` passa pela solicitação de senha gráfica do macOS.
 
 **Meus dados saem do meu Mac?**
 Só as métricas ao vivo + a tabela de processos, e apenas para a Anthropic via a *sua própria* CLI `claude` (ou para a OpenAI via `codex`) — exatamente como se você mesmo usasse essa CLI. O app não adiciona nenhuma telemetria.
@@ -148,10 +148,10 @@ A configuração fica em `~/.config/mac-optimizing-looper/config.json` (copie de
 - **Risco desconhecido = tratado como perigoso.** À prova de falhas; você confirma.
 - **`sudo` → solicitação de senha gráfica.** Uma execução em segundo plano não tem TTY, então comandos de root passam por `osascript … with administrator privileges`.
 - **Sem a CLI `claude` = sem conselho.** Ele mostra o erro em vez de chutar.
-- As notificações precisam do bundle do app; um binário cru recorre a abrir a janela de resultado.
+- As notificações precisam do bundle do app; um binário cru abre a janela de resultado diretamente.
 
 </details>
 
 ---
 
-Licenciado sob MIT. Feito para quem prefere saber *por que* o Mac está lento a reiniciar na esperança de que melhore.
+Licenciado sob MIT. Feito para quem prefere saber *por que* o Mac está lento do que reiniciar e torcer pra melhorar.

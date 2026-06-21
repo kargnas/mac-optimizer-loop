@@ -9,7 +9,7 @@
 
 **Mac이 버벅대면 → Claude가 CPU/RAM을 잡아먹는 범인 프로세스를 콕 집어내고 → 클릭 한 번에 끝냄. 당신이 누르기 전까진 아무 일도 안 일어남 — 그래서 위험할 게 없음.**
 
-매시간 Mac의 부하가 Claude에게 전달됨. Claude는 *진짜로* CPU/RAM을 잡아먹는 놈을 심각도순으로 정렬하고, 정확한 해결 명령을 작성해서 메뉴바에 띄움 — 위험한 순서대로, 색깔로 구분해서, 클릭 한 번 거리에. 그리고 뭔가 실행되기 전에, *두 번째* Claude 패스가 그 명령을 반드시 **SAFE**로 판정해야 함.
+매시간 Mac 부하가 Claude한테 넘어감. Claude는 *진짜로* CPU/RAM을 잡아먹는 놈을 심각도순으로 정렬하고, 정확한 해결 명령을 작성해서 메뉴바에 띄움 — 위험한 순서대로, 색깔로 구분해서, 클릭 한 번 거리에. 그리고 뭔가 실행되기 전에, *두 번째* Claude 패스가 그 명령을 반드시 **SAFE**로 판정해야 함.
 
 **Mac Optimizing Looper**는 Dock 아이콘 없는 macOS 메뉴바 앱임. 로컬 LLM CLI 위에서 **관찰 → 모델에게 질의 → 제안 → (선택적) 실행** 루프를 끊임없이 돌림.
 
@@ -30,7 +30,7 @@
 →  claude -p   (포맷 패스 → 정렬된 JSON 제안)
 ```
 
-메뉴바에 개수가 뜸. 드롭다운은 **위험한 순서대로** 정렬됨: 🔴 위급 → 🟡 경고 → 🟢 위생. 각 행은 **Copy** · **Show in Terminal** · **Review with Claude** · **Run Command Now**로 펼쳐짐.
+메뉴바에 개수가 뜸. 드롭다운은 **위험한 순서대로** 나옴: 🔴 위급 → 🟡 경고 → 🟢 위생. 각 행은 **Copy**, **Show in Terminal**, **Review with Claude**, **Run Command Now**로 펼쳐짐.
 
 ## 안전 게이트 — Mac을 날려먹지 않는 이유
 
@@ -77,7 +77,7 @@ bare 바이너리가 아니라 **번들**로 실행할 것 — `UNUserNotificati
 
 ## 입맛대로 설정
 
-설정에서 **프로바이더 / 모델 / 속도 / Fast Mode**를 고름 — 모델과 추론 강도는 각 CLI에서 **실시간**으로 읽어옴. 기본 백엔드는 `claude` CLI이며 `codex`도 지원함(스키마 기반 단일 패스, 별도 포맷 단계 없음). UI는 **10개 언어**로 완전히 현지화돼 있고, **Language** 피커가 UI 언어와 분석 출력 언어를 함께 정함.
+설정에서 **프로바이더 / 모델 / 속도 / Fast Mode**를 고름 — 모델과 추론 강도는 각 CLI에서 **실시간**으로 읽어옴. 기본 백엔드는 `claude` CLI이며 `codex`도 지원함(스키마 기반 단일 패스, 별도 포맷 단계 없음). UI는 **10개 언어**로 현지화됐고, **Language** 피커가 UI 언어와 분석 출력 언어를 함께 정함.
 
 <p align="center"><img src="docs/settings-ko.png" alt="Mac Optimizing Looper 설정 — 프로바이더·모델·언어·주기" width="520"></p>
 
@@ -87,10 +87,10 @@ bare 바이너리가 아니라 **번들**로 실행할 것 — `UNUserNotificati
 아니요. 제안은 비활성 데이터임. 유일한 실행 경로는 "Run Command Now" 버튼이고, 당신의 클릭에서만 작동함 — `GuardrailTests`로 강제됨.
 
 **"Run" 눌러도 안전한가요?**
-모든 명령이 두 번째 Claude 패스를 거침. 명확히 `SAFE`가 아니면(`unknown` 포함) 기본값이 **취소**인 확인 창이 뜸. `sudo`는 macOS GUI 비밀번호 프롬프트로 라우팅됨.
+모든 명령이 두 번째 Claude 패스를 거침. 명확히 `SAFE`가 아니면(`unknown` 포함) 기본값이 **취소**인 확인 창이 뜸. `sudo`는 macOS GUI 비밀번호 창으로 넘어감.
 
 **제 데이터가 Mac을 떠나나요?**
-실시간 지표 + 프로세스 목록만, 그리고 *당신 본인의* `claude` CLI(또는 `codex`로 OpenAI)를 통해서만 전송됨 — 그 CLI를 직접 쓰는 것과 똑같음. 앱이 추가하는 텔레메트리는 0임.
+실시간 지표 + 프로세스 목록만, 그리고 *당신 본인의* `claude` CLI(또는 `codex`로 OpenAI)로만 나감 — 직접 쓰는 것과 똑같음. 앱이 추가하는 텔레메트리는 0임.
 
 **비용이 드나요?**
 기존 `claude` / `codex` CLI 사용분 외엔 없음. 앱은 무료이고 MIT 라이선스임.
@@ -146,7 +146,7 @@ MUST NOT: claim anything was executed — the app never auto-runs.
 
 - **스스로 행동하지 않음.** "Run Command Now"만 실행하며, 당신의 클릭에서만.
 - **unknown 위험 = 위험으로 취급.** Fail-safe, 당신이 확인함.
-- **`sudo` → GUI 비밀번호 프롬프트.** 백그라운드 실행은 TTY가 없으므로 root 명령은 `osascript … with administrator privileges`로 라우팅됨.
+- **`sudo` → GUI 비밀번호 프롬프트.** 백그라운드 실행은 TTY가 없으므로 root 명령은 `osascript … with administrator privileges`로 넘어감.
 - **`claude` CLI 없음 = 제안 없음.** 추측하지 않고 오류를 드러냄.
 - 알림은 앱 번들이 필요함. bare 바이너리는 결과 창을 직접 여는 것으로 폴백함.
 

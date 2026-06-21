@@ -21,7 +21,7 @@ Every hour, your Mac's load goes to Claude. It ranks what's *actually* hogging y
 
 ## How it works
 
-One cycle, top to bottom:
+One cycle:
 
 ```
 ⏱  timer fires (default: every 1h, slider 10m … 36h)
@@ -44,7 +44,7 @@ click ▸ Run Command Now   ($ kill 8123)
 →  suggestion marked ✓ done
 ```
 
-Anything not classified `SAFE` — **including `unknown`** — pops a confirmation dialog whose default button is **Cancel**. The advice itself is inert data; the model can never make the app run a thing. That contract is locked down by `GuardrailTests`.
+Anything not classified `SAFE` (including `unknown`) pops a confirmation dialog defaulting to **Cancel**. The advice itself is inert data; the model can never make the app run a thing. Enforced by `GuardrailTests`.
 
 ## Mac Optimizing Looper vs the usual suspects
 
@@ -77,7 +77,7 @@ Run the **bundle**, not the bare binary — `UNUserNotificationCenter` needs a r
 
 ## Make it yours
 
-Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read **live** from each CLI. Default backend is the `claude` CLI; `codex` is also supported (one schema-constrained pass, no separate format step). The UI is fully localized in **10 languages**, and the **Language** picker drives both the UI *and* the analysis output language.
+Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read live from each CLI. Default backend is the `claude` CLI; `codex` is also supported (one schema-constrained pass, no separate format step). The UI is in 10 languages; the **Language** picker controls both the UI and what language Claude analyzes in.
 
 <p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper Settings — provider, model, language, interval" width="520"></p>
 
@@ -90,7 +90,7 @@ No. Advice is inert data. The single execution path is the "Run Command Now" but
 Every command goes through a second Claude pass. Anything not clearly `SAFE` (including `unknown`) pops a confirm dialog defaulting to **Cancel**. `sudo` routes through the macOS GUI password prompt.
 
 **Does my data leave my Mac?**
-Only the live metrics + process table, and only to Anthropic via *your own* `claude` CLI (or OpenAI via `codex`) — exactly like using that CLI yourself. The app adds zero telemetry.
+Only the live metrics + process table, sent to Anthropic via *your own* `claude` CLI (or OpenAI via `codex`). The app adds zero telemetry.
 
 **What does it cost?**
 Nothing beyond your existing `claude` / `codex` CLI usage. The app is free and MIT-licensed.

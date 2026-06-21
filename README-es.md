@@ -11,7 +11,7 @@
 
 Cada hora, la carga de tu Mac viaja a Claude. Clasifica lo que *de verdad* está devorando tu CPU/RAM, escribe la solución exacta y la suelta en tu barra de menús: lo peor primero, con código de color, a un clic de distancia. Y antes de ejecutar nada, una *segunda* pasada de Claude tiene que dar luz verde al comando como **SAFE**.
 
-**Mac Optimizing Looper** es una app de barra de menús para macOS (sin icono en el Dock) que ejecuta un bucle continuo de **observar → preguntar al modelo → aconsejar → (opcionalmente) actuar** sobre tu CLI de LLM local.
+**Mac Optimizing Looper** es una app de barra de menús para macOS (sin icono en el Dock) que ejecuta un bucle continuo de **observar → preguntar al modelo → aconsejar → (opcionalmente) actuar** con tu CLI de LLM local.
 
 [**⬇ Instalar**](#instalación) · [**Míralo en acción ↓**](#cómo-funciona)
 
@@ -44,7 +44,7 @@ click ▸ Run Command Now   ($ kill 8123)
 →  suggestion marked ✓ done
 ```
 
-Cualquier cosa que no se clasifique como `SAFE` — **incluido `unknown`** — abre un diálogo de confirmación cuyo botón por defecto es **Cancelar**. El consejo en sí es dato inerte; el modelo jamás puede hacer que la app ejecute nada. Ese contrato lo dejan sellado los `GuardrailTests`.
+Cualquier cosa que no se clasifique como `SAFE` — **incluido `unknown`** — abre un diálogo de confirmación cuyo botón por defecto es **Cancelar**. El análisis en sí no hace nada; el modelo no puede ejecutar nada por su cuenta. Eso lo garantizan los `GuardrailTests`.
 
 ## Mac Optimizing Looper frente a los sospechosos de siempre
 
@@ -65,7 +65,7 @@ Necesita la CLI `claude` en tu PATH. macOS 13+.
 brew install --cask kargnas/tap/mac-optimizing-looper
 ```
 
-> El cask + DMG estarán disponibles tras la primera versión firmada. La canalización está montada y solo espera por los secretos de firma — consulta [docs/release-setup.md](docs/release-setup.md). Hasta entonces, compila desde el código fuente:
+> El cask + DMG estarán disponibles tras la primera versión firmada. El pipeline ya está listo, solo faltan los secretos de firma — consulta [docs/release-setup.md](docs/release-setup.md). Mientras tanto, compila desde el código fuente:
 
 ```bash
 git clone https://github.com/kargnas/mac-optimizing-looper
@@ -84,10 +84,10 @@ Elige **Provider / Model / Speed / Fast Mode** en Ajustes — los modelos y los 
 ## Preguntas frecuentes
 
 **¿Ejecuta algo alguna vez por su cuenta?**
-No. El consejo es dato inerte. La única vía de ejecución es el botón "Run Command Now", con tu clic — garantizado por `GuardrailTests`.
+No. El análisis no hace nada por sí solo. La única vía de ejecución es el botón "Run Command Now", con tu clic — los `GuardrailTests` lo garantizan.
 
 **¿Es seguro pulsar "Run"?**
-Todo comando pasa por una segunda pasada de Claude. Cualquier cosa que no sea claramente `SAFE` (incluido `unknown`) abre un diálogo de confirmación que por defecto está en **Cancelar**. `sudo` se enruta por la solicitud de contraseña de la GUI de macOS.
+Todo comando pasa por una segunda pasada de Claude. Cualquier cosa que no sea claramente `SAFE` (incluido `unknown`) abre un diálogo de confirmación que por defecto está en **Cancelar**. `sudo` pide la contraseña a través del diálogo del sistema de macOS.
 
 **¿Salen mis datos de mi Mac?**
 Solo las métricas en vivo + la tabla de procesos, y solo a Anthropic vía *tu propia* CLI `claude` (o a OpenAI vía `codex`) — exactamente igual que si usaras esa CLI tú mismo. La app no añade telemetría alguna.
@@ -146,7 +146,7 @@ La configuración vive en `~/.config/mac-optimizing-looper/config.json` (copia `
 
 - **Nunca actúa por su cuenta.** Solo "Run Command Now" ejecuta, y solo con tu clic.
 - **Riesgo desconocido = tratado como peligroso.** A prueba de fallos; tú confirmas.
-- **`sudo` → solicitud de contraseña en la GUI.** Una ejecución en segundo plano no tiene TTY, así que los comandos como root pasan por `osascript … with administrator privileges`.
+- **`sudo` → solicitud de contraseña en la GUI.** Los procesos en segundo plano no tienen TTY, así que los comandos como root pasan por `osascript … with administrator privileges`.
 - **Sin la CLI `claude` = sin consejo.** Muestra el error en lugar de adivinar.
 - Las notificaciones necesitan el bundle de la app; un binario suelto recurre a abrir la ventana de resultados.
 

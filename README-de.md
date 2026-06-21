@@ -9,7 +9,7 @@
 
 **Dein Mac würgt → Claude nennt exakt den Prozess, der ihn auffrisst → ein Klick beendet ihn. Bis du klickst, passiert nichts — also kein Risiko für deinen Mac.**
 
-Jede Stunde wandert die Auslastung deines Macs zu Claude. Es sortiert, was *wirklich* deine CPU/RAM verschlingt, schreibt den exakten Fix und legt ihn in deine Menüleiste – das Schlimmste zuerst, farbcodiert, einen Klick entfernt. Und bevor irgendetwas läuft, muss ein *zweiter* Claude-Durchlauf den Befehl als **SAFE** freigeben.
+Stündlich landet die Auslastung deines Macs bei Claude. Es sortiert, was *wirklich* deine CPU/RAM verschlingt, schreibt den exakten Fix und legt ihn in deine Menüleiste – das Schlimmste zuerst, farbcodiert, per Klick abrufbar. Und bevor irgendetwas läuft, muss ein *zweiter* Claude-Durchlauf den Befehl als **SAFE** freigeben.
 
 **Mac Optimizing Looper** ist eine macOS-Menüleisten-App (ohne Dock-Symbol), die auf deiner lokalen LLM-CLI eine fortlaufende Schleife aus **beobachten → das Modell fragen → beraten → (optional) handeln** ausführt.
 
@@ -44,7 +44,7 @@ click ▸ Run Command Now   ($ kill 8123)
 →  suggestion marked ✓ done
 ```
 
-Alles, was nicht als `SAFE` eingestuft ist – **einschließlich `unknown`** –, öffnet einen Bestätigungsdialog, dessen Standardschaltfläche **Cancel** ist. Der Rat selbst ist untätige Datei; das Modell kann die App niemals dazu bringen, etwas auszuführen. Diese Zusage ist durch `GuardrailTests` festgenagelt.
+Alles, was nicht als `SAFE` eingestuft ist – **einschließlich `unknown`** –, öffnet einen Bestätigungsdialog, dessen Standardschaltfläche **Cancel** ist. Die Empfehlungen selbst führen nichts aus – das Modell kann die App nie zur Ausführung zwingen. Das erzwingen die `GuardrailTests`.
 
 ## Mac Optimizing Looper gegen die üblichen Verdächtigen
 
@@ -77,23 +77,23 @@ Führe das **Bundle** aus, nicht die nackte Binärdatei – `UNUserNotificationC
 
 ## Mach es zu deinem
 
-Wähle **Provider / Model / Speed / Fast Mode** in den Einstellungen – Modelle und Reasoning-Stufen werden **live** aus jeder CLI ausgelesen. Standard-Backend ist die `claude`-CLI; `codex` wird ebenfalls unterstützt (ein schema-gebundener Durchlauf, kein separater Formatierungsschritt). Die Oberfläche ist vollständig in **10 Sprachen** lokalisiert, und die Auswahl **Language** steuert sowohl die Oberfläche *als auch* die Sprache der Analyseausgabe.
+Wähle **Provider / Model / Speed / Fast Mode** in den Einstellungen – Modelle und Reasoning-Stufen werden **live** aus jeder CLI ausgelesen. Standard-Backend ist die `claude`-CLI; `codex` wird ebenfalls unterstützt (ein schema-gebundener Durchlauf, kein separater Formatierungsschritt). Die Oberfläche ist in **10 Sprachen** verfügbar – die Auswahl **Language** steuert sowohl die Oberfläche *als auch* die Sprache der Analyseausgabe.
 
 <p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper Einstellungen — Provider, Modell, Sprache, Intervall" width="520"></p>
 
 ## FAQ
 
 **Führt es jemals etwas von allein aus?**
-Nein. Ratschläge sind untätige Datei. Der einzige Ausführungspfad ist die Schaltfläche „Run Command Now", auf deinen Klick – erzwungen durch `GuardrailTests`.
+Nein. Die App führt nie eigenständig etwas aus. Der einzige Weg ist die Schaltfläche „Run Command Now" – dein Klick, abgesichert durch `GuardrailTests`.
 
 **Ist es sicher, auf „Run" zu drücken?**
 Jeder Befehl läuft durch einen zweiten Claude-Durchlauf. Alles, was nicht eindeutig `SAFE` ist (einschließlich `unknown`), öffnet einen Bestätigungsdialog mit Standard auf **Cancel**. `sudo` läuft über die macOS-GUI-Passwortabfrage.
 
 **Verlassen meine Daten meinen Mac?**
-Nur die Live-Metriken + die Prozesstabelle, und nur an Anthropic über *deine eigene* `claude`-CLI (oder an OpenAI über `codex`) – genau so, als würdest du die CLI selbst benutzen. Die App fügt null Telemetrie hinzu.
+Nur die Live-Metriken + die Prozesstabelle, und nur an Anthropic über *deine eigene* `claude`-CLI (oder an OpenAI über `codex`) – genau so, als würdest du die CLI selbst benutzen. Die App selbst sammelt keine Telemetrie.
 
 **Was kostet es?**
-Nichts über deine bestehende `claude`- / `codex`-CLI-Nutzung hinaus. Die App ist kostenlos und MIT-lizenziert.
+Nur was du über `claude` / `codex` sowieso schon sendest. Mehr nicht. Die App ist kostenlos und MIT-lizenziert.
 
 **Keine `claude`-CLI installiert?**
 Dann kein Rat – es zeigt den Fehler an, statt zu raten.
@@ -154,4 +154,4 @@ Die Konfiguration liegt unter `~/.config/mac-optimizing-looper/config.json` (kop
 
 ---
 
-MIT-lizenziert. Gebaut für Leute, die lieber *wissen*, warum ihr Mac lahmt, als neu zu starten und zu hoffen.
+MIT-lizenziert. Für alle, die lieber *wissen*, warum ihr Mac lahmt, als ihn neu zu starten – und zu hoffen.

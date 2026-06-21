@@ -17,7 +17,7 @@
 
 <p align="center"><img src="docs/menu.png" alt="Mac Optimizing Looper のメニュー — 順位付けされ、深刻度ごとに色分けされた修正" width="540"></p>
 
-> アクティビティモニタは 200 行を見せて、答えはゼロ。これが見せるのは、それを直す **1 つのコマンド** と、その理由です。
+> アクティビティモニタは 200 行を見せて、答えはゼロ。見せるのは修正コマンド **1 つ** と、その理由だけ。
 
 ## 仕組み
 
@@ -44,7 +44,7 @@ click ▸ Run Command Now   ($ kill 8123)
 →  suggestion marked ✓ done
 ```
 
-`SAFE` と分類されないものは — `unknown` も含めて — デフォルトボタンが **Cancel** の確認ダイアログを出します。助言そのものは不活性なデータで、モデルがアプリに何かを走らせることは決してできません。この取り決めは `GuardrailTests` でガチガチに固定されています。
+`SAFE` と分類されないもの（`unknown` も含む）は、デフォルトボタンが **Cancel** の確認ダイアログを出します。助言そのものは不活性なデータで、モデルがアプリに何かを走らせることは決してできません。`GuardrailTests` がこれをガチガチに固定しています。
 
 ## Mac Optimizing Looper と、よくある面々
 
@@ -65,7 +65,7 @@ click ▸ Run Command Now   ($ kill 8123)
 brew install --cask kargnas/tap/mac-optimizing-looper
 ```
 
-> cask と DMG は、最初の署名済みリリース後に公開されます。パイプラインは組み上がっていて、署名用シークレット待ちの状態です — [docs/release-setup.md](docs/release-setup.md) を参照。それまでは、ソースからビルドしてください:
+> cask と DMG は、最初の署名済みリリース後に公開されます。パイプラインは組み上がっていて、署名用シークレットを待つだけです — [docs/release-setup.md](docs/release-setup.md) を参照。それまでは、ソースからビルドしてください:
 
 ```bash
 git clone https://github.com/kargnas/mac-optimizing-looper
@@ -77,7 +77,7 @@ bash script/build_and_run.sh run     # builds the .app, codesigns ad-hoc, launch
 
 ## 自分仕様にする
 
-Settings で **Provider / Model / Speed / Fast Mode** を選べます — モデルと推論レベルは各 CLI から **リアルタイム** に読み込まれます。デフォルトのバックエンドは `claude` CLI で、`codex` もサポート (スキーマで制約された 1 パス、別のフォーマット工程なし)。UI は **10 言語** に完全ローカライズされ、**Language** ピッカーは UI *と* 分析出力の言語の両方を切り替えます。
+Settings で **Provider / Model / Speed / Fast Mode** を選べます — モデルと推論レベルは各 CLI から **リアルタイム** に読み込まれます。デフォルトのバックエンドは `claude` CLI で、`codex` もサポート (スキーマで制約された 1 パス、別のフォーマット工程なし)。UI は **10 言語** に完全ローカライズされ、**Language** ピッカーで UI と分析出力の言語をまとめて切り替えられます。
 
 <p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper の設定 — プロバイダー、モデル、言語、間隔" width="520"></p>
 
