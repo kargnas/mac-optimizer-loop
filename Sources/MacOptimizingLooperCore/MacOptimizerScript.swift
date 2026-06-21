@@ -111,12 +111,19 @@ public enum MacOptimizerScript {
         if let configured = environment["MAC_OPTIMIZER_SCRIPT"], !configured.isEmpty {
             paths.append(configured)
         }
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        paths.append(contentsOf: [
-            "\(home)/.claude/skills/mac-optimizer/mac-optimize.sh",
-            "\(home)/.agents/skills/mac-optimizer/mac-optimize.sh",
-            "\(home)/.codex/skills/mac-optimizer/mac-optimize.sh"
-        ])
+        // Shipped location. build-app.zsh / build_and_run.sh copy the tracked skill into
+        // Contents/Resources, so this is the ONLY source for binary-install and Homebrew-cask
+        // users — they have no ~/.claude|.agents|.codex skill tree. We deliberately do NOT
+        // probe $HOME: the scan must be self-contained in the bundle, not silently borrowed
+        // from whatever skill the user happens to have installed for an unrelated agent.
+        if let resourceURL = Bundle.main.resourceURL?.appendingPathComponent("mac-optimize.sh") {
+            paths.append(resourceURL.path)
+        }
+        // Dev fallback: `swift run` / `swift test` run from the repo root with no app bundle,
+        // so read the tracked source-of-truth that the build later bundles. Mirrors the same
+        // bundle-first / repo-CWD-fallback resolution as ResponseFormatterProvider.
+        let current = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        paths.append(current.appendingPathComponent(".agents/skills/mac-optimizer/mac-optimize.sh").path)
 
         var seen = Set<String>()
         return paths.compactMap { path in

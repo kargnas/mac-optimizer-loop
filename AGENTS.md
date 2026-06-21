@@ -31,6 +31,11 @@ periodically analyzes system load with Claude and surfaces prioritized advice.
   **sustained monitor** samples before evaluating. `MacOptimizerScript.runIfAvailable`
   runs the one-shot snapshot AND, when `monitorSeconds > 0`, a second `--monitor N`
   pass (separate script mode) appended to the report. `0` disables the monitor pass.
+  The scan script (`mac-optimize.sh`) is **bundled** into `Contents/Resources/` by both
+  build scripts from the tracked source at `.agents/skills/mac-optimizer/`.
+  `MacOptimizerScript` resolves it from `Bundle.main` only (plus a repo-CWD dev fallback
+  and the `MAC_OPTIMIZER_SCRIPT` override) and **never from `$HOME`** — so binary-install
+  and Homebrew-cask users are self-contained, not dependent on a separately-installed skill.
 
 ## Release pipeline
 

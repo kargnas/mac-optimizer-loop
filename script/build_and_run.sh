@@ -16,6 +16,8 @@ APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 RESPONSE_GUIDE_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-response-guide.sh"
 RESPONSE_FORMAT_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-format-json.sh"
+# Scan skill ships inside the bundle (MacOptimizerScript reads Bundle.main, never $HOME).
+MAC_OPTIMIZER_SCRIPT_SRC="$ROOT_DIR/.agents/skills/mac-optimizer/mac-optimize.sh"
 
 cd "$ROOT_DIR"
 
@@ -37,6 +39,8 @@ cp "$RESPONSE_GUIDE_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-response-guide
 chmod +x "$APP_RESOURCES/mac-optimizing-looper-response-guide.sh"
 cp "$RESPONSE_FORMAT_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-format-json.sh"
 chmod +x "$APP_RESOURCES/mac-optimizing-looper-format-json.sh"
+cp "$MAC_OPTIMIZER_SCRIPT_SRC" "$APP_RESOURCES/mac-optimize.sh"
+chmod +x "$APP_RESOURCES/mac-optimize.sh"
 
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

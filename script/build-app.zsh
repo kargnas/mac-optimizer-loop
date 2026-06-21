@@ -67,6 +67,12 @@ for s in mac-optimizing-looper-response-guide.sh mac-optimizing-looper-format-js
   chmod +x "$APP_RESOURCES/$s"
 done
 
+# The mac-optimizer scan skill is the system-load data source. It ships from the tracked
+# repo copy (.agents/skills/...) so binary-install and cask users — who have no ~/.agents
+# skill tree — still get the scan. MacOptimizerScript resolves it from Bundle.main only.
+cp "$ROOT_DIR/.agents/skills/mac-optimizer/mac-optimize.sh" "$APP_RESOURCES/mac-optimize.sh"
+chmod +x "$APP_RESOURCES/mac-optimize.sh"
+
 # Auto-check keys only in release builds (SPARKLE_AUTO=1); absent ones default to
 # off in Sparkle, so a local ad-hoc bundle never background-updates itself.
 if [[ "$SPARKLE_AUTO" == "1" ]]; then
