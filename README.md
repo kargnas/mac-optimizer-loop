@@ -1,18 +1,27 @@
-# mac-optimizing-looper
+# 🔥 Your Mac is slow. Claude finds the culprit.
 
 **English** · [한국어](README-ko.md) · [简体中文](README-zh-Hans.md) · [繁體中文](README-zh-Hant.md) · [日本語](README-ja.md) · [Español](README-es.md) · [Deutsch](README-de.md) · [Français](README-fr.md) · [Português](README-pt-BR.md) · [Русский](README-ru.md)
 
-**Every N minutes your Mac's load goes to Claude → Claude ranks what's actually eating CPU/RAM and drops the exact fix into your menu bar. One click runs it — but only after a second Claude pass clears the command as safe.**
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)
+![SwiftPM](https://img.shields.io/badge/SwiftPM-compatible-F05138?logo=swift&logoColor=white)
+![Menu bar app](https://img.shields.io/badge/menu--bar-no%20Dock%20icon-success)
 
-A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask the model → advise → (optionally) act** loop on top of a local LLM CLI. It never touches your system on its own; every action is one explicit, risk-checked click.
+**Your Mac chokes → Claude names the exact process eating it → one click kills it. It never acts on its own.**
 
-**Providers:** the default backend is the `claude` CLI; the `codex` CLI is also supported. Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read live from each CLI. With codex, the analysis is a single schema-constrained pass (no separate format pass).
+Every hour, your Mac's load goes to Claude. It ranks what's *actually* hogging your CPU/RAM, writes the exact fix, and drops it in your menu bar — worst-first, color-coded, one click away. And before anything runs, a *second* Claude pass has to clear the command as **SAFE**.
 
-**Languages:** the UI is fully localized in 10 languages (English, 한국어, 简体中文, 繁體中文, 日本語, Español, Deutsch, Français, Português do Brasil, Русский). The Settings **Language** picker drives both the UI and the analysis output language; "System default" follows your macOS language.
+**Mac Optimizing Looper** is a macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask the model → advise → (optionally) act** loop on top of your local LLM CLI.
 
-<p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper Settings — provider, model, language, interval" width="520"></p>
+[**⬇ Install**](#install) · [**See it work ↓**](#how-it-works)
 
-## The loop, one cycle
+<p align="center"><img src="docs/menu.png" alt="Mac Optimizing Looper menu — ranked, severity-colored fixes" width="540"></p>
+
+> Activity Monitor shows you 200 rows and zero answers. This shows you the **one command** that fixes it — and why.
+
+## How it works
+
+One cycle, top to bottom:
 
 ```
 ⏱  timer fires (default: every 1h, slider 10m … 36h)
@@ -21,25 +30,78 @@ A macOS menu-bar app (no Dock icon) that runs a continuous **observe → ask the
 →  claude -p   (format pass → ranked JSON suggestions)
 ```
 
-The menu bar shows the count; the dropdown is ranked worst-first (🔴 critical → 🟡 warning → 🟢 hygiene). Each row expands into Copy / Show in Terminal / Review with Claude / Run Command Now:
+The menu bar shows the count. The dropdown is ranked **worst-first**: 🔴 critical → 🟡 warning → 🟢 hygiene. Each row expands into **Copy** · **Show in Terminal** · **Review with Claude** · **Run Command Now**.
 
-<p align="center"><img src="docs/menu.png" alt="mac-optimizing-looper menu — ranked, severity-colored suggestions" width="520"></p>
+## The safety gate — why it won't nuke your Mac
 
-## Run a fix — the gated path
-
-"Run Command Now" is the *only* path that executes anything, and it is gated end to end:
+"Run Command Now" is the **only** path that executes anything, and it's gated end to end:
 
 ```
 click ▸ Run Command Now   ($ kill 8123)
 →  claude -p   classifies → RISK: SAFE
-→  background run   (sudo → GUI password prompt, because there is no TTY)
+→  background run   (sudo → GUI password prompt, because there's no TTY)
 →  ✅ notification → click → full stdout/stderr window
 →  suggestion marked ✓ done
 ```
 
-Anything not classified `SAFE` — including `unknown` — pops a confirmation dialog whose default button is **Cancel**.
+Anything not classified `SAFE` — **including `unknown`** — pops a confirmation dialog whose default button is **Cancel**. The advice itself is inert data; the model can never make the app run a thing. That contract is locked down by `GuardrailTests`.
 
-## System prompt (sanitized excerpt)
+## Mac Optimizing Looper vs the usual suspects
+
+| | Activity Monitor | "Cleaner" apps | **Mac Optimizing Looper** |
+|---|---|---|---|
+| Finds the actual culprit | you read 200 rows | guesses | 🟢 Claude ranks worst-first |
+| Tells you *why* it's slow | ✗ | ✗ | 🟢 plain-language reason |
+| Gives the exact fix | ✗ | generic "clean" | 🟢 the real `kill` / `unload` command |
+| Acts on its own | — | 🔴 yes, on a schedule | 🟢 never — only on your click |
+| Safety-gated before running | — | ✗ | 🟢 second Claude pass clears it `SAFE` |
+| Where your data goes | local | varies | only to your own Claude CLI |
+
+## Install
+
+Needs the `claude` CLI on your PATH. macOS 13+.
+
+```bash
+brew install --cask kargnas/tap/mac-optimizing-looper
+```
+
+> The cask + DMG go live after the first signed release. The pipeline is wired and waiting on signing secrets — see [docs/release-setup.md](docs/release-setup.md). Until then, build from source:
+
+```bash
+git clone https://github.com/kargnas/mac-optimizing-looper
+cd mac-optimizing-looper
+bash script/build_and_run.sh run     # builds the .app, codesigns ad-hoc, launches
+```
+
+Run the **bundle**, not the bare binary — `UNUserNotificationCenter` needs a real bundle id (`as.kargn.MacOptimizingLooper`).
+
+## Make it yours
+
+Pick **Provider / Model / Speed / Fast Mode** in Settings — models and reasoning levels are read **live** from each CLI. Default backend is the `claude` CLI; `codex` is also supported (one schema-constrained pass, no separate format step). The UI is fully localized in **10 languages**, and the **Language** picker drives both the UI *and* the analysis output language.
+
+<p align="center"><img src="docs/settings.png" alt="Mac Optimizing Looper Settings — provider, model, language, interval" width="520"></p>
+
+## FAQ
+
+**Does it ever run anything by itself?**
+No. Advice is inert data. The single execution path is the "Run Command Now" button, on your click — enforced by `GuardrailTests`.
+
+**Is it safe to hit "Run"?**
+Every command goes through a second Claude pass. Anything not clearly `SAFE` (including `unknown`) pops a confirm dialog defaulting to **Cancel**. `sudo` routes through the macOS GUI password prompt.
+
+**Does my data leave my Mac?**
+Only the live metrics + process table, and only to Anthropic via *your own* `claude` CLI (or OpenAI via `codex`) — exactly like using that CLI yourself. The app adds zero telemetry.
+
+**What does it cost?**
+Nothing beyond your existing `claude` / `codex` CLI usage. The app is free and MIT-licensed.
+
+**No `claude` CLI installed?**
+Then no advice — it surfaces the error instead of guessing.
+
+<details>
+<summary><b>Under the hood</b> — system prompt, full cycle, decision flow, config, limits</summary>
+
+### System prompt (sanitized excerpt)
 
 ```
 You are a macOS performance analyst.
@@ -52,7 +114,7 @@ MUST:     return a null command when no command-line action applies.
 MUST NOT: claim anything was executed — the app never auto-runs.
 ```
 
-## What each cycle can touch
+### What each cycle can touch
 
 | Step | Tool | Side effect |
 |---|---|---|
@@ -63,7 +125,7 @@ MUST NOT: claim anything was executed — the app never auto-runs.
 | Run | `CommandExecutor` | **runs the command** (user-initiated only) |
 | Review | configured terminal + interactive `claude` | opens a terminal |
 
-## Decision flow
+### Decision flow
 
 ```
 timer → collect → claude analyze → rank suggestions
@@ -76,31 +138,20 @@ timer → collect → claude analyze → rank suggestions
                                                    └─ else → confirm (default Cancel)
 ```
 
-## Install
+### Config
 
-Needs the `claude` CLI on your PATH. macOS 13+.
+Config lives at `~/.config/mac-optimizing-looper/config.json` (copy `config.example.json`): provider, model, thinking level, monitor seconds, interval, terminal, language. It's read once at launch — restart after hand-editing.
 
-```bash
-brew install --cask kargnas/tap/mac-optimizing-looper
-```
+### Limits / what it refuses
 
-> _The cask + DMG go live after the first signed release. The release pipeline is wired but waits on signing secrets — see [docs/release-setup.md](docs/release-setup.md). Until then, build from source below._
-
-### Build from source
-
-```bash
-git clone https://github.com/kargnas/mac-optimizing-looper
-cd mac-optimizing-looper
-bash script/build_and_run.sh run     # builds the .app, codesigns ad-hoc, launches
-```
-
-Run the **bundle**, not the bare binary — `UNUserNotificationCenter` needs a real bundle id (`as.kargn.MacOptimizingLooper`). Config lives at `~/.config/mac-optimizing-looper/config.json` (copy `config.example.json`): model, thinking level, monitor seconds, interval, terminal, language.
-
-## Limits / what it refuses
-
-- **Never acts on its own.** Advice is inert data; only "Run Command Now" executes, and only on your click — enforced by `GuardrailTests`.
+- **Never acts on its own.** Only "Run Command Now" executes, and only on your click.
 - **Unknown risk = treated as dangerous.** Fail-safe; you confirm.
 - **`sudo` → GUI password prompt.** A background run has no TTY, so root commands route through `osascript … with administrator privileges`.
 - **No `claude` CLI = no advice.** It surfaces the error instead of guessing.
-- Notifications need the app bundle; a bare binary can't post them and falls back to opening the result window.
+- Notifications need the app bundle; a bare binary falls back to opening the result window.
 
+</details>
+
+---
+
+MIT licensed. Built for people who'd rather know *why* their Mac is slow than reboot and hope.
