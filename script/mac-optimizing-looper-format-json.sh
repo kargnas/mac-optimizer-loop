@@ -13,6 +13,14 @@ analysis_file=""
 output_dir="${TMPDIR:-/tmp}"
 claude_bin="${CLAUDE_CLI_PATH:-}"
 
+home_dir="${HOME:-}"
+if [ -n "$home_dir" ]; then
+  PATH="$PATH:$home_dir/.local/bin:$home_dir/.bun/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+else
+  PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+fi
+export PATH
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --analysis-file)
@@ -63,6 +71,20 @@ fi
 
 if [ -z "$claude_bin" ]; then
   claude_bin="$(command -v claude || true)"
+fi
+
+if [ -z "$claude_bin" ] && [ -n "$home_dir" ]; then
+  for candidate in \
+    "$home_dir/.local/bin/claude" \
+    "$home_dir/.claude/local/claude" \
+    "/opt/homebrew/bin/claude" \
+    "/usr/local/bin/claude"
+  do
+    if [ -x "$candidate" ]; then
+      claude_bin="$candidate"
+      break
+    fi
+  done
 fi
 
 if [ -z "$claude_bin" ] || [ ! -x "$claude_bin" ]; then

@@ -11,6 +11,8 @@ final class LocalizationTests: XCTestCase {
     func testEnglishLoadsSourceStrings() {
         XCTAssertEqual(AppStrings(languageIdentifier: "en").analyzeNow, "Analyze Now")
         XCTAssertEqual(AppStrings(languageIdentifier: "en").quit, "Quit")
+        XCTAssertEqual(AppStrings(languageIdentifier: "en").choiceDefault, "Default")
+        XCTAssertEqual(AppStrings(languageIdentifier: "en").choiceDefaultWith("Claude"), "Default (Claude)")
     }
 
     func testKoreanLoadsTranslatedStrings() {

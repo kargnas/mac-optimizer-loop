@@ -19,6 +19,8 @@
 "menu.settings" = "Settings…";
 "menu.checkForUpdates" = "Check for Updates…";
 "menu.quit" = "Quit";
+"menu.choiceDefault" = "Default";
+"menu.choiceDefaultWith" = "Default (%@)";
 
 /* Suggestion row actions */
 "action.showInTerminal" = "Show Command in Terminal";
