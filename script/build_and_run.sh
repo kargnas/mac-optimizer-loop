@@ -12,12 +12,14 @@ APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
+APP_FRAMEWORKS="$APP_CONTENTS/Frameworks"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 RESPONSE_GUIDE_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-response-guide.sh"
 RESPONSE_FORMAT_SCRIPT="$ROOT_DIR/script/mac-optimizing-looper-format-json.sh"
 # Scan skill ships inside the bundle (MacOptimizerScript reads Bundle.main, never $HOME).
 MAC_OPTIMIZER_SCRIPT_SRC="$ROOT_DIR/.agents/skills/mac-optimizer/mac-optimize.sh"
+CORE_BUNDLE="MacOptimizingLooper_MacOptimizingLooperCore.bundle"
 
 cd "$ROOT_DIR"
 
@@ -28,13 +30,30 @@ done < <(pgrep -x "$APP_NAME" || true)
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 swift build
-BUILD_BINARY="$(swift build --show-bin-path)/$APP_NAME"
+BIN_PATH="$(swift build --show-bin-path)"
+BUILD_BINARY="$BIN_PATH/$APP_NAME"
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS"
 mkdir -p "$APP_RESOURCES"
+mkdir -p "$APP_FRAMEWORKS"
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
+if [[ -d "$BIN_PATH/$CORE_BUNDLE" ]]; then
+  cp -R "$BIN_PATH/$CORE_BUNDLE" "$APP_RESOURCES/$CORE_BUNDLE"
+else
+  echo "ERROR: localized resource bundle not found at $BIN_PATH/$CORE_BUNDLE" >&2
+  exit 1
+fi
+if [[ -d "$BIN_PATH/Sparkle.framework" ]]; then
+  cp -R "$BIN_PATH/Sparkle.framework" "$APP_FRAMEWORKS/Sparkle.framework"
+  if ! otool -l "$APP_BINARY" | grep -q "@executable_path/../Frameworks"; then
+    install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_BINARY"
+  fi
+else
+  echo "ERROR: Sparkle.framework not found at $BIN_PATH/Sparkle.framework" >&2
+  exit 1
+fi
 cp "$RESPONSE_GUIDE_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-response-guide.sh"
 chmod +x "$APP_RESOURCES/mac-optimizing-looper-response-guide.sh"
 cp "$RESPONSE_FORMAT_SCRIPT" "$APP_RESOURCES/mac-optimizing-looper-format-json.sh"

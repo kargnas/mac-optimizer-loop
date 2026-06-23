@@ -1,14 +1,16 @@
 import Foundation
 
-/// Resolves a forced locale identifier to its `.lproj` sub-bundle inside `Bundle.module`.
+/// Resolves a forced locale identifier to its `.lproj` sub-bundle inside the
+/// packaged Core resource bundle.
 ///
 /// The app drives a *chosen* UI language (config override or system locale), which the
 /// system-bound `NSLocalizedString(_:comment:)` cannot honor — that one keys off the
 /// process's preferred-language list. So we locate the exact `.lproj` for the requested
 /// locale and read strings from that bundle. Missing keys fall back to en because the
 /// returned bundle's own `Localizable.strings` is consulted; if the whole locale is
-/// absent we hand back `.module` (default localization = en).
+/// absent we hand back the Core resource bundle itself (default localization = en).
 enum LocalizationBundle {
+    private static let resourceBundleName = "MacOptimizingLooper_MacOptimizingLooperCore.bundle"
     private static var cache: [String: Bundle] = [:]
     private static let lock = NSLock()
 
@@ -23,14 +25,31 @@ enum LocalizationBundle {
     }
 
     private static func resolve(_ identifier: String) -> Bundle {
+        let resources = coreResourceBundle()
         for candidate in candidates(for: identifier) {
             // SwiftPM lowercases generated .lproj directory names (e.g. `zh-hans.lproj`,
             // `pt-br.lproj`), and path(forResource:) is case-sensitive — so match lowercased.
-            if let path = Bundle.module.path(forResource: candidate.lowercased(), ofType: "lproj"),
+            if let path = resources.path(forResource: candidate.lowercased(), ofType: "lproj"),
                let bundle = Bundle(path: path) {
                 return bundle
             }
         }
+        return resources
+    }
+
+    private static func coreResourceBundle() -> Bundle {
+        let fileManager = FileManager.default
+        let bundleURLs = [
+            Bundle.main.resourceURL?.appendingPathComponent(resourceBundleName),
+            Bundle.main.bundleURL.appendingPathComponent(resourceBundleName),
+        ].compactMap { $0 }
+
+        for url in bundleURLs where fileManager.fileExists(atPath: url.path) {
+            if let bundle = Bundle(url: url) {
+                return bundle
+            }
+        }
+
         return .module
     }
 
