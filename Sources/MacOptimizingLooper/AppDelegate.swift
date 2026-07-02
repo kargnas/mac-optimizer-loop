@@ -30,6 +30,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     // analysis failed). updateStatusBarButton checks this BEFORE rendering
     // advice so a stale `latestAdvice` does not mask the current failure.
     private var failureActive = false
+    // One delayed re-run scheduled after a failed analysis. Kept so a manual
+    // "Analyze Now" or a new loop tick can cancel the stale retry.
+    private var failureRetryTask: Task<Void, Never>?
 
     // Direct-run feature: results indexed by notification id so a tapped notification
     // can reopen the matching output. One reusable result window.
@@ -152,8 +155,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         return resolved
     }
 
-    private func runAnalysis() async {
+    private func runAnalysis(isRetry: Bool = false) async {
         guard !isAnalyzing else { return }
+
+        // Any run supersedes a pending failure retry (manual, loop tick, or the
+        // retry itself firing) — never leave two runs queued.
+        failureRetryTask?.cancel()
+        failureRetryTask = nil
 
         beginAnalysisStatus()
 
@@ -201,6 +209,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             updateStatusBarButton()
             headerItem.title = strings.analysisFailed(shortDescription(error))
             rebuildMenu()
+            // Analysis failures are usually transient API errors (usage limit,
+            // overload), so retry once after a short delay instead of sitting in
+            // the failed state until the next hourly tick. A failed retry does NOT
+            // reschedule (isRetry guard) — that would poll the API in a loop.
+            if !isRetry {
+                scheduleFailureRetry()
+            }
+        }
+    }
+
+    private func scheduleFailureRetry() {
+        failureRetryTask?.cancel()
+        failureRetryTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 300 * 1_000_000_000)
+            guard !Task.isCancelled else { return }
+            await self?.runAnalysis(isRetry: true)
         }
     }
 
