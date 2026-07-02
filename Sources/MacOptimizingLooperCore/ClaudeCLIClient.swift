@@ -72,7 +72,14 @@ public struct ClaudeCLIClient: LLMClient {
         let errorOutput = String(data: (try? Data(contentsOf: errorURL)) ?? Data(), encoding: .utf8) ?? ""
 
         guard process.terminationStatus == 0 else {
-            throw LLMError.processFailed(process.terminationStatus, errorOutput.trimmingCharacters(in: .whitespacesAndNewlines))
+            // claude prints API failures ("API Error: 429 …", usage-limit notices) to
+            // STDOUT and exits nonzero with an EMPTY stderr, so stderr alone loses the
+            // actual cause and the UI shows a bare "process failed 1". Fall back to
+            // stdout (capped: it is unbounded and lands in a one-line menu title).
+            let stderrText = errorOutput.trimmingCharacters(in: .whitespacesAndNewlines)
+            let stdoutText = output.trimmingCharacters(in: .whitespacesAndNewlines)
+            let message = stderrText.isEmpty ? String(stdoutText.prefix(300)) : stderrText
+            throw LLMError.processFailed(process.terminationStatus, message)
         }
 
         return output
